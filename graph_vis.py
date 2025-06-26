@@ -38,7 +38,7 @@ plt.figure(figsize=(10, 10))
 nx.draw_networkx_nodes(G, pos, node_color=color_map, node_size=600)
 nx.draw_networkx_labels(G, pos, labels=labels, font_size=8)
 
-nx.draw_networkx_edges(G, pos, alpha=0.3)
+nx.draw_networkx_edges(G, pos, alpha=0.2)
 
 plt.title("Residential Areas and Places of Refuge")
 plt.tight_layout()

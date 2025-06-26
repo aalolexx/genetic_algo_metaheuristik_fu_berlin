@@ -1,7 +1,7 @@
 import os
 import json
 from hashlib import md5
-from metaheuristiken import example_mh
+from metaheuristiken import genetic_mh
 
 # Verzeichnisse
 INSTANZEN_VERZEICHNIS = os.path.join("data", "input")
@@ -28,18 +28,18 @@ def lade_daten_aus_json(dateipfad):
 def main():
     eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "example_evacuation_data.json"))
 
-    CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'example_mh_config.json')
+    CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'genetic_mh_config.json')
 
     with open(CONFIG_DATEI, 'r', encoding='utf-8') as f:
         file_content = ''.join(f.readlines())
         konfigurations_daten = lade_konfiguration_aus_json(file_content)
         config_hash = md5(file_content.encode('utf-8'))
 
-    DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'example_mh_xample_instanz_{config_hash}')
+    DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'genetic_mh_xample_instanz_{config_hash}')
 
     mh = []
     mh.append(
-        example_mh.ExampleMetaheuristik(
+        genetic_mh.GeneticMetaheuristik(
             eingabe_daten,
             konfigurations_daten,
             DURCHLAUF_VERZEICHNIS
