@@ -35,9 +35,43 @@ class GeneticMetaheuristik(Metaheuristik):
                     rescue_routes.append(
                         Route(ra["id"], target_rp_id, random.randrange(0, upper_start_time_border + 1, step), distance)
                     )
-            #todo: try to close gaps where noone is moving
+
             end = time.time()
-            print(f"time to generate random solution {i}/{self.konfiguration['population_size']}:", end - start)
+            print(f"time to generate random solution {i + 1}/{self.konfiguration['population_size']}:", end - start)
+
+            ### close gaps where noone is moving
+            if False: # it almost takes forever
+                # track time for closing gaps...if it takes too long then we need to think about this again
+                start = time.time()
+
+                max_t = max([(r.start_time + r.distance) for r in rescue_routes])
+
+                noone_is_on_street_counter = 0
+                adjustment_for_shifting = 0
+
+                # iterate through whole timeframe to find gaps
+                for t in range(0, max_t, step):
+                    t = t - adjustment_for_shifting
+                    print("t: ", t, "/", max_t)
+
+                    people_on_street = len([r for r in rescue_routes if r.start_time <= t < (r.start_time + r.distance)])
+                    if people_on_street==0:
+                        noone_is_on_street_counter += step
+
+                    # if gap end found
+                    if people_on_street > 0 and noone_is_on_street_counter!=0:
+                        #shift all routes forward that are not in the past
+                        move_forward = [r for r in rescue_routes if r.start_time >= t]
+                        for m in move_forward:
+                            m.set_start_time(m.start_time - noone_is_on_street_counter)
+
+                        adjustment_for_shifting += noone_is_on_street_counter
+                        max_t -= noone_is_on_street_counter
+                        noone_is_on_street_counter = 0
+
+                end = time.time()
+                print(f"time to close gaps for random solution {i + 1}/{self.konfiguration['population_size']}:", end - start)
+
             solutions.append(
                 PossibleSolution(
                     routes = rescue_routes,
