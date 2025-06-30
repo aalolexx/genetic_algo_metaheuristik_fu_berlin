@@ -26,7 +26,7 @@ def lade_daten_aus_json(dateipfad):
     return tmp_eingabe_daten
 #%%
 def main():
-    eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "example_evacuation_data.json"))
+    eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "small_evacuation_data.json"))
 
     CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'genetic_mh_config.json')
 
