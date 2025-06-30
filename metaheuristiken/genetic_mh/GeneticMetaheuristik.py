@@ -17,7 +17,8 @@ class GeneticMetaheuristik(Metaheuristik):
 
         city_population = sum([ra["population"] for ra in ra_list])
         # set upper boarder for start time by (population (city population size * longest edge)
-        upper_start_time_border = max([e["distance_km"] for e in edges_list]) * city_population
+        #todo: think about how to set this. Too high: probably increases computation time. Too low: street_capacity is exceeded too often -> low fittness
+        upper_start_time_border = max([int(e["distance_km"]) for e in edges_list])* 1000 * (city_population - 1) * self.konfiguration["street_capacity"] # " - 1" because only the start time is relevant here
         max_street_capacity = math.ceil(self.konfiguration["street_capacity"] * city_population)
 
         step = 10 #the data is accurate to 10 meters, so we are iterating over looks with step = 10
