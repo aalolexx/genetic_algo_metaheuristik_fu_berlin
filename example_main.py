@@ -1,7 +1,7 @@
 import os
 import json
 from hashlib import md5
-from metaheuristiken import genetic_mh
+from metaheuristiken.genetic_mh.GeneticMetaheuristik import GeneticMetaheuristik
 
 # Verzeichnisse
 INSTANZEN_VERZEICHNIS = os.path.join("data", "input")
