@@ -2,9 +2,6 @@ from metaheuristiken.genetic_mh.Route import Route
 from metaheuristiken.genetic_mh.GlobalTracker import GlobalTracker
 
 class PossibleSolution:
-    def __init__(self, max_street_capacity):
-        self.routes = []
-        self.loss = float.infinity # goal: loss = 0
     def __init__(self, routes, max_street_capacity):
         self.routes = routes
         self.loss = float("inf") # goal: loss = 0
