@@ -44,7 +44,7 @@ class GeneticMetaheuristik(Metaheuristik):
                     max_street_capacity = max_street_capacity
                 )
             )
-
+        self.loesung = solutions
 
     def iteriere(self):
         pass
