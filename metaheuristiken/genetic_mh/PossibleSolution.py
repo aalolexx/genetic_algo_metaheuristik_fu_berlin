@@ -1,5 +1,6 @@
 from metaheuristiken.genetic_mh.Route import Route
 from metaheuristiken.genetic_mh.GlobalTracker import GlobalTracker
+from copy import deepcopy
 
 class PossibleSolution:
     def __init__(self, routes, max_street_capacity):
@@ -11,9 +12,11 @@ class PossibleSolution:
         return f"{self.__class__.__name__}(#routes={len(self.routes)}, loss={self.loss}, street_cap={self.max_street_capacity})"
 
 
-    def get_loss(self):
+    def set_loss(self, all_prs):
         # loss = a * street_overflow + b * pr_overflow + steps
-        return 0
+        # todo better balanced loss function (this is just for a first debugging)
+        amount_street_overflows, street_overflow_sum, current_step = self.get_street_overflows()
+        self.loss = amount_street_overflows + self.get_amount_pr_overflows(all_prs) + current_step
 
     #
     # Analysis Functions
@@ -28,24 +31,32 @@ class PossibleSolution:
         current_step = 0
         step_size = 10
 
-        while (True):
-            persons_on_street = 0
-            persons_in_shelter = 0
+        routes_to_scan = deepcopy(self.routes) # create a copy and delete its routes when person reached PR to optimize performance
 
-            for route in self.routes:
+        persons_on_street = 0
+        persons_in_shelter = 0
+
+        while (True):
+            # take a step on each route
+            for route in routes_to_scan:
+                # if the route has started and is not done, indicate that a person is on the street
                 if route.start_time < current_step < route.start_time + route.distance:
                     persons_on_street += 1
 
-                if route.starte_time + route.distance < current_step:
+                # A person has reached its shelter
+                if route.start_time + route.distance < current_step:
                     persons_in_shelter += 1
+                    routes_to_scan.remove(route)
 
                 if persons_on_street > self.max_street_capacity:
                     amount_street_overflows += 1
                     street_overflow_sum += persons_on_street - self.max_street_capacity
 
-            current_step += step_size 
+            current_step += step_size
 
-            if persons_in_shelter == len(route):
+            #print(f"step: {current_step}, in_s: {persons_in_shelter}, rts left: {len(routes_to_scan)}")
+
+            if persons_in_shelter >= len(self.routes):
                 break # Everybody is in the shelter
             
         return amount_street_overflows, street_overflow_sum, current_step
@@ -57,11 +68,14 @@ class PossibleSolution:
         sum_pr_overflows = 0
 
         prs_with_usage = all_prs.copy()
-        prs_with_usage['current_usage'] = 0
+        for pr in prs_with_usage:
+            pr['current_usage'] = 0
 
         for route in self.routes:
-            prs_with_usage[route.PR]['current_usage'] += 1
+            next(pr for pr in prs_with_usage if pr['id'] == route.PR)['current_usage'] += 1
 
-        for pr_id in prs_with_usage:
-            if prs_with_usage[pr_id]["current_usage"] > prs_with_usage[pr_id]["capacity"]:
-                sum_pr_overflows += prs_with_usage[pr_id]["current_usage"] - prs_with_usage[pr_id]["capacity"]
+        for pr in prs_with_usage:
+            if pr['current_usage'] > pr['capacity']:
+                sum_pr_overflows += pr['current_usage'] - pr['capacity']
+
+        return sum_pr_overflows

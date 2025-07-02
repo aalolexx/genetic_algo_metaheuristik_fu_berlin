@@ -2,6 +2,7 @@ import os
 import json
 from hashlib import md5
 from metaheuristiken.genetic_mh.GeneticMetaheuristik import GeneticMetaheuristik
+from metaheuristiken.genetic_mh.loss_plotter import plot_losses
 
 # Verzeichnisse
 INSTANZEN_VERZEICHNIS = os.path.join("data", "input")
@@ -26,25 +27,34 @@ def lade_daten_aus_json(dateipfad):
     return tmp_eingabe_daten
 #%%
 def main():
-    eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "small_evacuation_data.json"))
+    eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "example_evacuation_data.json"))
 
     CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'genetic_mh_config.json')
 
     with open(CONFIG_DATEI, 'r', encoding='utf-8') as f:
         file_content = ''.join(f.readlines())
         konfigurations_daten = lade_konfiguration_aus_json(file_content)
-        config_hash = md5(file_content.encode('utf-8'))
+        config_hash = md5(file_content.encode('utf-8')).hexdigest()
 
     DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'genetic_mh_xample_instanz_{config_hash}')
 
     mh = []
     mh.append(
-        genetic_mh.GeneticMetaheuristik(
+        GeneticMetaheuristik(
             eingabe_daten,
             konfigurations_daten,
             DURCHLAUF_VERZEICHNIS
         )
     )
+
+    # todo remove the follinwg, just for local testing
+    mh[0].initialisiere()
+    for i in range(70):
+        print(f"ITERATION {i}/70")
+        mh[0].iteriere()
+        mh[0].bewerte_loesung()
+    
+    plot_losses(DURCHLAUF_VERZEICHNIS)
 
 if __name__ == "__main__":
     main()

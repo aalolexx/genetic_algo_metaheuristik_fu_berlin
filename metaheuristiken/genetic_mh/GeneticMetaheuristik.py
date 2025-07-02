@@ -2,36 +2,48 @@ from basis.metaheuristik import Metaheuristik
 import random
 from metaheuristiken.genetic_mh.Route import Route
 from metaheuristiken.genetic_mh.PossibleSolution import PossibleSolution
+from metaheuristiken.genetic_mh.Generation import Generation
+from metaheuristiken.genetic_mh import GeneticUtils
 import math
 import time
+import os
 
 class GeneticMetaheuristik(Metaheuristik):
+    def __init__(self, instanz_daten, konfiguration, durchlauf_verzeichnis):
+        super().__init__(instanz_daten, konfiguration, durchlauf_verzeichnis)
+
+        os.makedirs(durchlauf_verzeichnis, exist_ok=True)
+
+        # Genetic Algorithm specific properties
+        self.generations = []
+
+        
     def initialisiere(self):
         # read graph data and set some general variable
 
-        ra_list = self.eingabe_daten["residential_areas"]
-        pr_list = self.eingabe_daten["places_of_refuge"]
-        edges_list = self.eingabe_daten["edges"]
+        self.ra_list = self.eingabe_daten["residential_areas"]
+        self.pr_list = self.eingabe_daten["places_of_refuge"]
+        self.edges_list = self.eingabe_daten["edges"]
 
-        pr_ids = [por["id"] for por in pr_list]
+        pr_ids = [por["id"] for por in self.pr_list]
 
-        city_population = sum([ra["population"] for ra in ra_list])
+        city_population = sum([ra["population"] for ra in self.ra_list])
         # set upper boarder for start time by (population (city population size * longest edge)
         #todo: think about how to set this. Too high: probably increases computation time. Too low: street_capacity is exceeded too often -> low fittness
-        upper_start_time_border = max([int(e["distance_km"]) for e in edges_list])* 1000 * (city_population - 1) * self.konfiguration["street_capacity"] # " - 1" because only the start time is relevant here
+        upper_start_time_border = max([int(e["distance_km"]) for e in self.edges_list])* 1000 * (city_population - 1) * self.konfiguration["street_capacity"] # " - 1" because only the start time is relevant here
         max_street_capacity = math.ceil(self.konfiguration["street_capacity"] * city_population)
 
         step = 10 #the data is accurate to 10 meters, so we are iterating over looks with step = 10
 
-        solutions = []
+        first_generation = Generation()
         for i in range(self.konfiguration["population_size"]): #"population_size" as in: population of solutions, not city_population
             #create a random initial solution
             start = time.time()
             rescue_routes = []
-            for ra in ra_list:
+            for ra in self.ra_list:
                 for human in range(0,ra["population"]):
                     target_rp_id = random.choice(pr_ids)
-                    distance = [int(edge["distance_km"]) for edge in edges_list if edge["from"]==ra["id"] and edge["to"]==target_rp_id][0] * 1000
+                    distance = [int(edge["distance_km"]) for edge in self.edges_list if edge["from"]==ra["id"] and edge["to"]==target_rp_id][0] * 1000
                     rescue_routes.append(
                         Route(ra["id"], target_rp_id, random.randrange(0, upper_start_time_border + 1, step), distance)
                     )
@@ -72,19 +84,60 @@ class GeneticMetaheuristik(Metaheuristik):
                 end = time.time()
                 print(f"time to close gaps for random solution {i + 1}/{self.konfiguration['population_size']}:", end - start)
 
-            solutions.append(
+            first_generation.append(
                 PossibleSolution(
                     routes = rescue_routes,
                     max_street_capacity = max_street_capacity
                 )
             )
-        self.loesung = solutions
+            
+        first_generation.set_losses(self.pr_list)
+        self.generations.append(first_generation)
+
 
     def iteriere(self):
-        pass
+        """
+        In the iteration we create a new generation of possible solutions
+        """
+        latest_generation = self.generations[-1]
+        new_generation = Generation()
+
+        while (len(new_generation) < len(latest_generation) - 1): # -1 because the best individual will be copied later
+            parent1, parent2 = GeneticUtils.select_two_by_roulette(latest_generation)
+            child = GeneticUtils.mutation_crossover(parent1, parent2)
+            new_generation.append(child)
+
+        # get and add the single best solution --> elitismus
+        new_generation.append(latest_generation.get_best())
+        
+        new_generation.set_losses(self.pr_list)
+        self.generations.append(new_generation)
+
+        # clean old generations to save storage
+        if len(self.generations) > 3:
+            self.generations.pop(0)
+
 
     def bewerte_loesung(self):
-        pass
+        """
+        Print/save and analyse the current generation
+        """
+        avg_loss = self.generations[-1].average_loss()
+        best_loss = self.generations[-1].get_best().loss
+
+        # add the losses to our logfiles
+        avg_path = os.path.join(self.durchlauf_verzeichnis, "average_losses.csv")
+        best_path = os.path.join(self.durchlauf_verzeichnis, "best_losses.csv")
+
+        with open(avg_path, 'a') as f_avg:
+            f_avg.write(f"{avg_loss}\n")
+
+        with open(best_path, 'a') as f_best:
+            f_best.write(f"{best_loss}\n")
+
+        print(f"Logged average: {avg_loss}, best: {best_loss}")
+
+
 
     def speichere_zwischenergebnis(self):
         pass
