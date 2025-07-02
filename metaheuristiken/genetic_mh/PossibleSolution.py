@@ -1,11 +1,14 @@
-import Route
-import GlobalTracker
+from metaheuristiken.genetic_mh.Route import Route
+from metaheuristiken.genetic_mh.GlobalTracker import GlobalTracker
 
 class PossibleSolution:
-    def __init__(self, max_street_capacity):
-        self.routes = []
-        self.loss = float.infinity # goal: loss = 0
+    def __init__(self, routes, max_street_capacity):
+        self.routes = routes
+        self.loss = float("inf") # goal: loss = 0
         self.max_street_capacity = max_street_capacity
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(#routes={len(self.routes)}, loss={self.loss}, street_cap={self.max_street_capacity})"
 
 
     def get_loss(self):
@@ -30,8 +33,7 @@ class PossibleSolution:
             persons_in_shelter = 0
 
             for route in self.routes:
-                if route.start_time < current_step \
-                    and route.start_time + route.distance > current_step:
+                if route.start_time < current_step < route.start_time + route.distance:
                     persons_on_street += 1
 
                 if route.starte_time + route.distance < current_step:

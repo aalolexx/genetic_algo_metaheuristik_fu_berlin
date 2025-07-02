@@ -5,6 +5,9 @@ class Route:
         self.start_time = start_time
         self.distance = distance # distance in meters (not km like in json)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.RA} -> {self.PR}, t={self.start_time}, m={self.distance})"
+
     def set_pr(self, pr_id, distance):
         self.PR = pr_id
         self.distance = distance
