@@ -15,8 +15,10 @@ class PossibleSolution:
     def set_loss(self, all_prs):
         # loss = a * street_overflow + b * pr_overflow + steps
         # todo better balanced loss function (this is just for a first debugging)
-        amount_street_overflows, street_overflow_sum, current_step = self.get_street_overflows()
-        self.loss = amount_street_overflows + self.get_amount_pr_overflows(all_prs) + current_step
+        amount_street_overflows, street_overflow_sum, normalized_time, steps_took = self.get_street_overflows()
+        sum_pr_overflows = self.get_sum_pr_overflows(all_prs)
+        self.loss = amount_street_overflows + sum_pr_overflows + normalized_time
+        #print(f"LOSS: {amount_street_overflows}, {sum_pr_overflows}, {normalized_time} ")
 
     #
     # Analysis Functions
@@ -25,46 +27,45 @@ class PossibleSolution:
     # gets the amount of street overflows
     # -> Should be used to optimize start_time
     def get_street_overflows(self):
-        amount_street_overflows = 0
-        street_overflow_sum = 0
+        events = []  # (time, delta_people), delta +1 for enter, -1 for exit
 
-        current_step = 0
-        step_size = 10
+        for route in self.routes:
+            enter_time = route.start_time
+            exit_time = route.start_time + route.distance
 
-        routes_to_scan = deepcopy(self.routes) # create a copy and delete its routes when person reached PR to optimize performance
+            events.append((enter_time, 1))   # person enters street
+            events.append((exit_time, -1))  # person leaves street
+
+        # Sort events by time
+        events.sort()
 
         persons_on_street = 0
-        persons_in_shelter = 0
+        amount_street_overflows = 0
+        street_overflow_sum = 0
+        last_event_time = 0
 
-        while (True):
-            # take a step on each route
-            for route in routes_to_scan:
-                # if the route has started and is not done, indicate that a person is on the street
-                if route.start_time < current_step < route.start_time + route.distance:
-                    persons_on_street += 1
+        for time, delta in events:
+            persons_on_street += delta
+            if persons_on_street > self.max_street_capacity:
+                amount_street_overflows += 1
+                street_overflow_sum += persons_on_street - self.max_street_capacity
+            last_event_time = time
+    
+        # Normalize last_event_time
+        max_start = max(route.start_time for route in self.routes)
+        max_dist = max(route.distance for route in self.routes)
+        max_possible_time = max_start + max_dist
+        normalized_time = last_event_time / max_possible_time if max_possible_time > 0 else 0
 
-                # A person has reached its shelter
-                if route.start_time + route.distance < current_step:
-                    persons_in_shelter += 1
-                    routes_to_scan.remove(route)
+        print(f"STREET OVERFLOW: {amount_street_overflows}, {street_overflow_sum}, {normalized_time}, {last_event_time}")
 
-                if persons_on_street > self.max_street_capacity:
-                    amount_street_overflows += 1
-                    street_overflow_sum += persons_on_street - self.max_street_capacity
+        return amount_street_overflows, street_overflow_sum, normalized_time, last_event_time
 
-            current_step += step_size
-
-            #print(f"step: {current_step}, in_s: {persons_in_shelter}, rts left: {len(routes_to_scan)}")
-
-            if persons_in_shelter >= len(self.routes):
-                break # Everybody is in the shelter
-            
-        return amount_street_overflows, street_overflow_sum, current_step
 
 
     # gets the amount of PR overflows
     # -> Should be used to optimize PR selection
-    def get_amount_pr_overflows(self, all_prs):
+    def get_sum_pr_overflows(self, all_prs):
         sum_pr_overflows = 0
 
         prs_with_usage = all_prs.copy()

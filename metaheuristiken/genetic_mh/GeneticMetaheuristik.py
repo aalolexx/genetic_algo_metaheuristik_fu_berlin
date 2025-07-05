@@ -45,7 +45,7 @@ class GeneticMetaheuristik(Metaheuristik):
                     target_rp_id = random.choice(pr_ids)
                     distance = [int(edge["distance_km"]) for edge in self.edges_list if edge["from"]==ra["id"] and edge["to"]==target_rp_id][0] * 1000
                     rescue_routes.append(
-                        Route(ra["id"], target_rp_id, random.randrange(0, upper_start_time_border + 1, step), distance)
+                        Route(ra["id"], target_rp_id, random.randrange(0, int(upper_start_time_border + 1), step), distance)
                     )
 
             end = time.time()
@@ -104,7 +104,7 @@ class GeneticMetaheuristik(Metaheuristik):
 
         while (len(new_generation) < len(latest_generation) - 1): # -1 because the best individual will be copied later
             parent1, parent2 = GeneticUtils.select_two_by_roulette(latest_generation)
-            child = GeneticUtils.mutation_crossover(parent1, parent2)
+            child = GeneticUtils.mutation_crossover(parent1, parent2, self.pr_list)
             new_generation.append(child)
 
         # get and add the single best solution --> elitismus

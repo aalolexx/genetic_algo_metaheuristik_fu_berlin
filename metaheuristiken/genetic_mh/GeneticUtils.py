@@ -12,7 +12,7 @@ def select_two_by_roulette(population):
     return selected[0], selected[1]
 
 
-def mutation_crossover(parent1, parent2):
+def mutation_crossover(parent1, parent2, all_prs, mutation_rate=0.1):
     """
     Mutation Method
     Uses the "crossover" method (randomly cutting and switching) to create a new solution out of two parents
@@ -25,4 +25,16 @@ def mutation_crossover(parent1, parent2):
         deepcopy(parent1.routes[:crossover_point]) +
         deepcopy(parent2.routes[crossover_point:])
     )
+
+    # Apply mutation to each route with a small chance
+    for route in child_routes:
+        if random.random() < mutation_rate:
+            # Mutate start_time slightly (±1)
+            route.start_time += random.choice([-1, 1])
+            route.start_time = max(0, route.start_time)  # clamp to zero
+
+        if random.random() < mutation_rate and all_prs:
+            # Mutate PR assignment randomly from allowed PRs for this RA
+                route.pr_id = random.choice(all_prs)
+
     return PossibleSolution(routes=child_routes, max_street_capacity=parent1.max_street_capacity) #todo maybe store the max_street_capacity somewhere else?

@@ -2,7 +2,8 @@ import os
 import json
 from hashlib import md5
 from metaheuristiken.genetic_mh.GeneticMetaheuristik import GeneticMetaheuristik
-from metaheuristiken.genetic_mh.loss_plotter import plot_losses
+from metaheuristiken.genetic_mh.PlottUtils import plot_losses
+import time
 
 # Verzeichnisse
 INSTANZEN_VERZEICHNIS = os.path.join("data", "input")
@@ -36,7 +37,7 @@ def main():
         konfigurations_daten = lade_konfiguration_aus_json(file_content)
         config_hash = md5(file_content.encode('utf-8')).hexdigest()
 
-    DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'genetic_mh_xample_instanz_{config_hash}')
+    DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'genetic_mh_xample_instanz_{config_hash}_{time.time()}')
 
     mh = []
     mh.append(
@@ -49,8 +50,8 @@ def main():
 
     # todo remove the follinwg, just for local testing
     mh[0].initialisiere()
-    for i in range(70):
-        print(f"ITERATION {i}/70")
+    for i in range(100):
+        print(f"ITERATION {i}/100")
         mh[0].iteriere()
         mh[0].bewerte_loesung()
     
