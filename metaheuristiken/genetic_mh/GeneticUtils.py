@@ -30,7 +30,7 @@ def mutation_crossover(parent1, parent2, all_prs, mutation_rate=0.1):
     for route in child_routes:
         if random.random() < mutation_rate:
             # Mutate start_time slightly (±1)
-            route.start_time += random.choice([-1, 1])
+            route.start_time += random.randrange(-100, 100) * 10 # todo set step size variable
             route.start_time = max(0, route.start_time)  # clamp to zero
 
         if random.random() < mutation_rate and all_prs:

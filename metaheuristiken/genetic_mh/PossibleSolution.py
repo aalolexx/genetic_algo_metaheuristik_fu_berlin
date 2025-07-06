@@ -8,17 +8,23 @@ class PossibleSolution:
         self.loss = float("inf") # goal: loss = 0
         self.max_street_capacity = max_street_capacity
 
+
     def __repr__(self):
         return f"{self.__class__.__name__}(#routes={len(self.routes)}, loss={self.loss}, street_cap={self.max_street_capacity})"
 
 
     def set_loss(self, all_prs):
+        street_cap_loss, pr_overflow_loss, normalized_time = self.get_loss_dict(all_prs)
+        self.loss = street_cap_loss + pr_overflow_loss + normalized_time
+        #print(f"LOSS: {street_overflow_sum / self.max_street_capacity}, {sum_pr_overflows}, {normalized_time} ")
+
+    
+    def get_loss_dict(self, all_prs):
         # loss = a * street_overflow + b * pr_overflow + steps
         # todo better balanced loss function (this is just for a first debugging)
         amount_street_overflows, street_overflow_sum, normalized_time, steps_took = self.get_street_overflows()
         sum_pr_overflows = self.get_sum_pr_overflows(all_prs)
-        self.loss = amount_street_overflows + sum_pr_overflows + normalized_time
-        #print(f"LOSS: {amount_street_overflows}, {sum_pr_overflows}, {normalized_time} ")
+        return street_overflow_sum / self.max_street_capacity, 10 * sum_pr_overflows, 10 * normalized_time
 
     #
     # Analysis Functions
@@ -57,7 +63,7 @@ class PossibleSolution:
         max_possible_time = max_start + max_dist
         normalized_time = last_event_time / max_possible_time if max_possible_time > 0 else 0
 
-        print(f"STREET OVERFLOW: {amount_street_overflows}, {street_overflow_sum}, {normalized_time}, {last_event_time}")
+        #print(f"STREET OVERFLOW: {amount_street_overflows}, {street_overflow_sum}, {normalized_time}, {last_event_time}")
 
         return amount_street_overflows, street_overflow_sum, normalized_time, last_event_time
 

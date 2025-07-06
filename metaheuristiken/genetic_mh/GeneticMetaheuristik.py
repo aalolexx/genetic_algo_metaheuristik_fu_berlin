@@ -47,7 +47,8 @@ class GeneticMetaheuristik(Metaheuristik):
                     target_rp_id = random.choice(pr_ids)
                     distance = [int(edge["distance_km"]) for edge in self.edges_list if edge["from"]==ra["id"] and edge["to"]==target_rp_id][0] * 1000
                     rescue_routes.append(
-                        Route(ra["id"], target_rp_id, random.randrange(0, int(upper_start_time_border + 1), step), distance)
+                        #Route(ra["id"], target_rp_id, random.randrange(0, int(upper_start_time_border + 1), step), distance)
+                        Route(ra["id"], target_rp_id, 0, distance)
                     )
 
             end = time.time()
@@ -104,13 +105,14 @@ class GeneticMetaheuristik(Metaheuristik):
         latest_generation = self.generations[-1]
         new_generation = Generation()
 
-        while (len(new_generation) < len(latest_generation) - 1): # -1 because the best individual will be copied later
+        while (len(new_generation) < len(latest_generation) - 10): # -10 because the best individuals will be copied later
             parent1, parent2 = GeneticUtils.select_two_by_roulette(latest_generation)
             child = GeneticUtils.mutation_crossover(parent1, parent2, self.pr_list)
             new_generation.append(child)
 
         # get and add the single best solution --> elitismus
-        new_generation.append(latest_generation.get_best())
+        elits = sorted(latest_generation, key=lambda p: p.loss)[:10]
+        new_generation += elits
         
         new_generation.set_losses(self.pr_list)
         self.generations.append(new_generation)
@@ -136,11 +138,15 @@ class GeneticMetaheuristik(Metaheuristik):
         # add the losses to our logfiles
         avg_path = os.path.join(self.durchlauf_verzeichnis, "average_losses.csv")
         best_path = os.path.join(self.durchlauf_verzeichnis, "best_losses.csv")
+        best_solution_path = os.path.join(self.durchlauf_verzeichnis, "best_solution_loss_dict.csv")
 
         with open(avg_path, 'a') as f_avg:
             f_avg.write(f"{avg_loss}\n")
 
         with open(best_path, 'a') as f_best:
             f_best.write(f"{best_solution.loss}\n")
+
+        with open(best_solution_path, 'a') as f_best:
+            f_best.write(f"{best_solution.get_loss_dict(self.pr_list)}\n")
 
         print(f"Logged average: {avg_loss}, best: {best_solution.loss}")

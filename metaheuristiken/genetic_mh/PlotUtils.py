@@ -45,6 +45,46 @@ def plot_losses(path):
     print(f"Plot saved to: {output_path}")
 
 
+def plot_loss_dict(path):
+    """
+    Plots all losses of the best solution of each generation to analyze how they relate and develop
+    """
+    # Load data
+    value1_list = []
+    value2_list = []
+    value3_list = []
+
+    dict_file = os.path.join(path, "best_solution_loss_dict.csv")
+
+    with open(dict_file, 'r') as f:
+        for row in f:
+            # Convert string like "(140.8, 1, 1.0)" to actual tuple
+            tup = eval(row.strip())  # Safe here if you fully trust the file
+            value1_list.append(tup[0])
+            value2_list.append(tup[1])
+            value3_list.append(tup[2])
+
+    # X-axis is just the generation/index
+    x = list(range(len(value1_list)))
+
+    # Plot
+    plt.figure(figsize=(12, 6))
+    plt.plot(x, value1_list, label='Street Cap Overflow')
+    plt.plot(x, value2_list, label='PR Overflow')
+    plt.plot(x, value3_list, label='Time (normalized)')
+
+    plt.xlabel("Generation")
+    plt.ylabel("Metric Value")
+    plt.title("Loss Dict of each generation")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+
+    # Save the plot instead of showing it
+    output_path = os.path.join(path, "loss_dict_plot.png")
+    plt.savefig(output_path)
+    print(f"Plot saved to: {output_path}")
+
 def plot_routes_timeline(path, routes, max_routes=800):
     # Optionally sample for performance
     if len(routes) > max_routes:
