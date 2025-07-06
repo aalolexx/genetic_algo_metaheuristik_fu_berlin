@@ -2,7 +2,7 @@ import os
 import json
 from hashlib import md5
 from metaheuristiken.genetic_mh.GeneticMetaheuristik import GeneticMetaheuristik
-from metaheuristiken.genetic_mh.PlottUtils import plot_losses
+from metaheuristiken.genetic_mh.PlotUtils import plot_losses, plot_routes_timeline, plot_people_on_street
 import time
 
 # Verzeichnisse
@@ -53,9 +53,13 @@ def main():
     for i in range(100):
         print(f"ITERATION {i}/100")
         mh[0].iteriere()
-        mh[0].bewerte_loesung()
+        mh[0].speichere_zwischenergebnis()
     
+
+    best_solution = mh[0].bewerte_loesung()
     plot_losses(DURCHLAUF_VERZEICHNIS)
+    plot_routes_timeline(DURCHLAUF_VERZEICHNIS, best_solution.routes)
+    plot_people_on_street(DURCHLAUF_VERZEICHNIS, best_solution.routes, mh[0].max_street_capacity)
 
 if __name__ == "__main__":
     main()

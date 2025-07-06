@@ -14,6 +14,8 @@ class GeneticMetaheuristik(Metaheuristik):
 
         os.makedirs(durchlauf_verzeichnis, exist_ok=True)
 
+        self.max_street_capacity = None # make public
+
         # Genetic Algorithm specific properties
         self.generations = []
 
@@ -31,7 +33,7 @@ class GeneticMetaheuristik(Metaheuristik):
         # set upper boarder for start time by (population (city population size * longest edge)
         #todo: think about how to set this. Too high: probably increases computation time. Too low: street_capacity is exceeded too often -> low fittness
         upper_start_time_border = max([int(e["distance_km"]) for e in self.edges_list])* 1000 * (city_population - 1) * self.konfiguration["street_capacity"] # " - 1" because only the start time is relevant here
-        max_street_capacity = math.ceil(self.konfiguration["street_capacity"] * city_population)
+        self.max_street_capacity = math.ceil(self.konfiguration["street_capacity"] * city_population)
 
         step = 10 #the data is accurate to 10 meters, so we are iterating over looks with step = 10
 
@@ -87,7 +89,7 @@ class GeneticMetaheuristik(Metaheuristik):
             first_generation.append(
                 PossibleSolution(
                     routes = rescue_routes,
-                    max_street_capacity = max_street_capacity
+                    max_street_capacity = self.max_street_capacity
                 )
             )
             
@@ -119,11 +121,17 @@ class GeneticMetaheuristik(Metaheuristik):
 
 
     def bewerte_loesung(self):
+        best_solution = self.generations[-1].get_best()
+        # TODO format the best solution into the given "flows" format
+        return best_solution
+
+
+    def speichere_zwischenergebnis(self):
         """
         Print/save and analyse the current generation
         """
         avg_loss = self.generations[-1].average_loss()
-        best_loss = self.generations[-1].get_best().loss
+        best_solution = self.generations[-1].get_best()
 
         # add the losses to our logfiles
         avg_path = os.path.join(self.durchlauf_verzeichnis, "average_losses.csv")
@@ -133,11 +141,6 @@ class GeneticMetaheuristik(Metaheuristik):
             f_avg.write(f"{avg_loss}\n")
 
         with open(best_path, 'a') as f_best:
-            f_best.write(f"{best_loss}\n")
+            f_best.write(f"{best_solution.loss}\n")
 
-        print(f"Logged average: {avg_loss}, best: {best_loss}")
-
-
-
-    def speichere_zwischenergebnis(self):
-        pass
+        print(f"Logged average: {avg_loss}, best: {best_solution.loss}")
