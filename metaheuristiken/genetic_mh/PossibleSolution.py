@@ -30,7 +30,7 @@ class PossibleSolution:
         sum_pr_overflows = self.get_sum_pr_overflows(self.all_prs)
         normalized_pr_overflow = sum_pr_overflows / population_size
 
-        return 10 * normalized_street_overflow, 10 * normalized_pr_overflow, normalized_time
+        return (10 * normalized_street_overflow) + 1, 10 * normalized_pr_overflow, normalized_time
 
     #
     # Analysis Functions
