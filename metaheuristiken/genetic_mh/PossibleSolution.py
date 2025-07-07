@@ -1,30 +1,36 @@
 from metaheuristiken.genetic_mh.Route import Route
 from metaheuristiken.genetic_mh.GlobalTracker import GlobalTracker
 from copy import deepcopy
+import numpy as np
 
 class PossibleSolution:
-    def __init__(self, routes, max_street_capacity):
+    def __init__(self, routes, max_street_capacity, all_prs):
         self.routes = routes
         self.loss = float("inf") # goal: loss = 0
         self.max_street_capacity = max_street_capacity
+        self.all_prs = all_prs
 
 
     def __repr__(self):
         return f"{self.__class__.__name__}(#routes={len(self.routes)}, loss={self.loss}, street_cap={self.max_street_capacity})"
 
 
-    def set_loss(self, all_prs):
-        street_cap_loss, pr_overflow_loss, normalized_time = self.get_loss_dict(all_prs)
-        self.loss = street_cap_loss + pr_overflow_loss + normalized_time
+    def set_loss(self):
+        street_cap_loss, pr_overflow_loss, time_loss = self.get_loss_dict()
+        self.loss = street_cap_loss + pr_overflow_loss + time_loss
         #print(f"LOSS: {street_overflow_sum / self.max_street_capacity}, {sum_pr_overflows}, {normalized_time} ")
 
     
-    def get_loss_dict(self, all_prs):
-        # loss = a * street_overflow + b * pr_overflow + steps
-        # todo better balanced loss function (this is just for a first debugging)
+    def get_loss_dict(self):
         amount_street_overflows, street_overflow_sum, normalized_time, steps_took = self.get_street_overflows()
-        sum_pr_overflows = self.get_sum_pr_overflows(all_prs)
-        return street_overflow_sum / self.max_street_capacity, 10 * sum_pr_overflows, 10 * normalized_time
+
+        population_size = len(self.routes)
+        normalized_street_overflow = street_overflow_sum / self.max_street_capacity / population_size
+
+        sum_pr_overflows = self.get_sum_pr_overflows(self.all_prs)
+        normalized_pr_overflow = sum_pr_overflows / population_size
+
+        return 10 * normalized_street_overflow, 10 * normalized_pr_overflow, normalized_time
 
     #
     # Analysis Functions
@@ -34,6 +40,7 @@ class PossibleSolution:
     # -> Should be used to optimize start_time
     def get_street_overflows(self):
         events = []  # (time, delta_people), delta +1 for enter, -1 for exit
+        longest_distance = 0
 
         for route in self.routes:
             enter_time = route.start_time
@@ -41,6 +48,9 @@ class PossibleSolution:
 
             events.append((enter_time, 1))   # person enters street
             events.append((exit_time, -1))  # person leaves street
+
+            if route.distance > longest_distance:
+                longest_distance = route.distance
 
         # Sort events by time
         events.sort()
@@ -58,10 +68,7 @@ class PossibleSolution:
             last_event_time = time
     
         # Normalize last_event_time
-        max_start = max(route.start_time for route in self.routes)
-        max_dist = max(route.distance for route in self.routes)
-        max_possible_time = max_start + max_dist
-        normalized_time = last_event_time / max_possible_time if max_possible_time > 0 else 0
+        normalized_time = last_event_time / longest_distance - 1 # 0 would be the optimal solution (unrealistic to reach due to max street cap)
 
         #print(f"STREET OVERFLOW: {amount_street_overflows}, {street_overflow_sum}, {normalized_time}, {last_event_time}")
 

@@ -37,4 +37,19 @@ def mutation_crossover(parent1, parent2, all_prs, mutation_rate=0.1):
             # Mutate PR assignment randomly from allowed PRs for this RA
                 route.pr_id = random.choice(all_prs)
 
-    return PossibleSolution(routes=child_routes, max_street_capacity=parent1.max_street_capacity) #todo maybe store the max_street_capacity somewhere else?
+    return PossibleSolution(
+         routes=child_routes,
+         max_street_capacity=parent1.max_street_capacity,
+         all_prs=parent1.all_prs
+    ) #todo maybe store the max_street_capacity somewhere else?
+
+
+def apply_explorative_mutation(possible_solution, all_prs):
+    new_possible_solution = deepcopy(possible_solution)
+    for route in new_possible_solution.routes:
+        # Mutate start_time slightly (±1)
+        route.start_time += random.randrange(-100, 100) * 10 # todo set step size variable
+        route.start_time = max(0, route.start_time)
+        route.pr_id = random.choice(all_prs)
+    return new_possible_solution
+     

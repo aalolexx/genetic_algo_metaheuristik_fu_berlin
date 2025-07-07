@@ -90,11 +90,12 @@ class GeneticMetaheuristik(Metaheuristik):
             first_generation.append(
                 PossibleSolution(
                     routes = rescue_routes,
-                    max_street_capacity = self.max_street_capacity
+                    max_street_capacity = self.max_street_capacity,
+                    all_prs = self.pr_list
                 )
             )
             
-        first_generation.set_losses(self.pr_list)
+        first_generation.set_losses()
         self.generations.append(first_generation)
 
 
@@ -105,7 +106,11 @@ class GeneticMetaheuristik(Metaheuristik):
         latest_generation = self.generations[-1]
         new_generation = Generation()
 
-        while (len(new_generation) < len(latest_generation) - 10): # -10 because the best individuals will be copied later
+        num_elits = 10
+        num_explorative_mutants = 10 # Idea: Use this for explortation
+        num_crossovers = len(latest_generation) - (num_elits + num_explorative_mutants)
+        
+        for i in range(num_crossovers):
             parent1, parent2 = GeneticUtils.select_two_by_roulette(latest_generation)
             child = GeneticUtils.mutation_crossover(parent1, parent2, self.pr_list)
             new_generation.append(child)
@@ -113,8 +118,14 @@ class GeneticMetaheuristik(Metaheuristik):
         # get and add the single best solution --> elitismus
         elits = sorted(latest_generation, key=lambda p: p.loss)[:10]
         new_generation += elits
+
+        # Add strong random mutations for exploration
+        for i in range(num_explorative_mutants):
+            random_ind = random.choice(latest_generation)
+            new_ind = GeneticUtils.apply_explorative_mutation(random_ind, self.pr_list)
+            new_generation.append(new_ind)
         
-        new_generation.set_losses(self.pr_list)
+        new_generation.set_losses()
         self.generations.append(new_generation)
 
         # clean old generations to save storage
@@ -147,6 +158,6 @@ class GeneticMetaheuristik(Metaheuristik):
             f_best.write(f"{best_solution.loss}\n")
 
         with open(best_solution_path, 'a') as f_best:
-            f_best.write(f"{best_solution.get_loss_dict(self.pr_list)}\n")
+            f_best.write(f"{best_solution.get_loss_dict()}\n")
 
         print(f"Logged average: {avg_loss}, best: {best_solution.loss}")

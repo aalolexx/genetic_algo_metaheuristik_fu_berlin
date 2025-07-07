@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import os
 import random
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 
 
 def plot_losses(path):
@@ -85,23 +87,31 @@ def plot_loss_dict(path):
     plt.savefig(output_path)
     print(f"Plot saved to: {output_path}")
 
+
 def plot_routes_timeline(path, routes, max_routes=800):
-    # Optionally sample for performance
     if len(routes) > max_routes:
         routes = random.sample(routes, max_routes)
 
     fig, ax = plt.subplots(figsize=(12, 8))
 
+    # Assign a unique color per PR using a simple color cycle
+    unique_prs = list(set(route.PR for route in routes))
+    colors = plt.cm.rainbow.resampled(len(unique_prs))
+    pr_to_color = {pr: colors(i) for i, pr in enumerate(unique_prs)}
+
     for idx, route in enumerate(routes):
         start = route.start_time
-        end = route.start_time + route.distance
-        ax.broken_barh([(start, route.distance)], (idx - 0.4, 0.8), facecolors='blue')
+        ax.broken_barh(
+            [(start, route.distance)],
+            (idx - 0.4, 0.8),
+            facecolors=pr_to_color[route.PR]
+        )
 
     ax.set_xlabel("Time")
     ax.set_ylabel("Route index")
-    ax.set_title("Rescue Route Timeline")
+    ax.set_title("Rescue Route Timeline (Colored by PR)")
+    plt.tight_layout()
 
-    # Save the plot instead of showing it
     output_path = os.path.join(path, "gantt_routes_timeline.png")
     plt.savefig(output_path)
     print(f"Plot saved to: {output_path}")

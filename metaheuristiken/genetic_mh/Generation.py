@@ -2,10 +2,10 @@ class Generation(list):
     def __init__(self, *args):
         super().__init__(*args)
 
-    def set_losses(self, all_prs):
+    def set_losses(self):
         #i = 0
         for ind in self:
-            ind.set_loss(all_prs)
+            ind.set_loss()
             #print(f"calculated ind loss ({i}/{len(self)})")
             #i += 1
 
