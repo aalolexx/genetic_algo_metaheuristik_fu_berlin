@@ -1,8 +1,9 @@
 class Route:
-    def __init__(self, ra_id, pr_id, start_time, distance):
+    def __init__(self, ra_id, pr_id, start_time, distance, group_size):
         self.RA = ra_id  
         self.PR = pr_id
         self.start_time = start_time
+        self.group_size = group_size
         self.distance = distance # distance in meters (not km like in json)
 
     def __repr__(self):

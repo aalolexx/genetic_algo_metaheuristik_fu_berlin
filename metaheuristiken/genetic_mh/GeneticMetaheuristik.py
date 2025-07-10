@@ -1,9 +1,11 @@
 from basis.metaheuristik import Metaheuristik
 import random
+from metaheuristiken.genetic_mh.Cluster import Cluster
 from metaheuristiken.genetic_mh.Route import Route
 from metaheuristiken.genetic_mh.PossibleSolution import PossibleSolution
 from metaheuristiken.genetic_mh.Generation import Generation
 from metaheuristiken.genetic_mh import GeneticUtils
+from copy import deepcopy
 import math
 import time
 import os
@@ -11,6 +13,10 @@ import os
 class GeneticMetaheuristik(Metaheuristik):
     def __init__(self, instanz_daten, konfiguration, durchlauf_verzeichnis):
         super().__init__(instanz_daten, konfiguration, durchlauf_verzeichnis)
+
+        self.ra_list = None
+        self.pr_list = None
+        self.edges_list = None
 
         os.makedirs(durchlauf_verzeichnis, exist_ok=True)
 
@@ -42,14 +48,30 @@ class GeneticMetaheuristik(Metaheuristik):
             #create a random initial solution
             start = time.time()
             rescue_routes = []
-            for ra in self.ra_list:
-                for human in range(0,ra["population"]):
-                    target_rp_id = random.choice(pr_ids)
-                    distance = [int(edge["distance_km"]) for edge in self.edges_list if edge["from"]==ra["id"] and edge["to"]==target_rp_id][0] * 1000
-                    rescue_routes.append(
-                        #Route(ra["id"], target_rp_id, random.randrange(0, int(upper_start_time_border + 1), step), distance)
-                        Route(ra["id"], target_rp_id, 0, distance)
-                    )
+
+            number_of_clusters = 2#()# self.konfiguration["cluster_number"]
+            cluster_size = math.floor(len(self.ra_list) / number_of_clusters)
+            clusters = []
+
+            areas_to_evacuate = deepcopy(self.ra_list)
+            for _ in range(number_of_clusters):
+
+                selected = random.sample(areas_to_evacuate, cluster_size if len(areas_to_evacuate) >= cluster_size else len(areas_to_evacuate))
+                areas_to_evacuate = [o for o in areas_to_evacuate if o not in selected]
+
+                routes = []
+
+                for ra in selected:
+                    dest = random.choice(self.pr_list)
+                    e = next((edge for edge in self.edges_list if edge["from"]==ra["id"] and edge["to"]==dest["id"]), None)
+
+                    distance, group_size = int(e["distance_km"]), next((o["population"] for o in self.ra_list if o["id"] == ra["id"]), None)
+
+
+                    r = Route(ra["id"], dest["id"], 0, distance, group_size)
+                    routes.append(r)
+
+                clusters.append(Cluster(routes))
 
             end = time.time()
             print(f"time to generate random solution {i + 1}/{self.konfiguration['population_size']}:", end - start)
@@ -89,7 +111,7 @@ class GeneticMetaheuristik(Metaheuristik):
 
             first_generation.append(
                 PossibleSolution(
-                    routes = rescue_routes,
+                    clusters = clusters,
                     max_street_capacity = self.max_street_capacity,
                     all_prs = self.pr_list
                 )

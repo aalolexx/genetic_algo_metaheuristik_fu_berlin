@@ -4,15 +4,15 @@ from copy import deepcopy
 import numpy as np
 
 class PossibleSolution:
-    def __init__(self, routes, max_street_capacity, all_prs):
-        self.routes = routes
+    def __init__(self, clusters, max_street_capacity, all_prs):
+        self.clusters = clusters
         self.loss = float("inf") # goal: loss = 0
         self.max_street_capacity = max_street_capacity
         self.all_prs = all_prs
 
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(#routes={len(self.routes)}, loss={self.loss}, street_cap={self.max_street_capacity})"
+        return f"{self.__class__.__name__}(#clusters={len(self.clusters)}, loss={self.loss}, street_cap={self.max_street_capacity})"
 
 
     def set_loss(self):
@@ -24,7 +24,7 @@ class PossibleSolution:
     def get_loss_dict(self):
         amount_street_overflows, street_overflow_sum, normalized_time, steps_took = self.get_street_overflows()
 
-        population_size = len(self.routes)
+        population_size = sum( [sum([r.group_size for r in c.routes]) for c in self.clusters])
         normalized_street_overflow = street_overflow_sum / self.max_street_capacity / population_size
 
         sum_pr_overflows = self.get_sum_pr_overflows(self.all_prs)
@@ -42,15 +42,16 @@ class PossibleSolution:
         events = []  # (time, delta_people), delta +1 for enter, -1 for exit
         longest_distance = 0
 
-        for route in self.routes:
-            enter_time = route.start_time
-            exit_time = route.start_time + route.distance
+        for c in self.clusters:
+            for r in c.routes:
+                enter_time = c.start_time
+                exit_time = c.start_time + r.distance
 
-            events.append((enter_time, 1))   # person enters street
-            events.append((exit_time, -1))  # person leaves street
+                events.append((enter_time, r.group_size))   # people enters street
+                events.append((exit_time, -r.group_size))  # people leaves street
 
-            if route.distance > longest_distance:
-                longest_distance = route.distance
+                if r.distance > longest_distance:
+                    longest_distance = r.distance
 
         # Sort events by time
         events.sort()
@@ -85,8 +86,9 @@ class PossibleSolution:
         for pr in prs_with_usage:
             pr['current_usage'] = 0
 
-        for route in self.routes:
-            next(pr for pr in prs_with_usage if pr['id'] == route.PR)['current_usage'] += 1
+        for cluster in self.clusters:
+            for route in cluster.routes:
+                next(pr for pr in prs_with_usage if pr['id'] == route.PR)['current_usage'] += route.group_size
 
         for pr in prs_with_usage:
             if pr['current_usage'] > pr['capacity']:
