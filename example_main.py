@@ -54,8 +54,8 @@ def main():
 
     # todo remove the follinwg, just for local testing
     mh[0].initialisiere()
-    for i in range(150):
-        print(f"ITERATION {i}/150")
+    for i in range(20):
+        print(f"ITERATION {i}/20")
         mh[0].iteriere()
         mh[0].speichere_zwischenergebnis()
     

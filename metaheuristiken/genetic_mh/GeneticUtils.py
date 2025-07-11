@@ -42,7 +42,7 @@ def mutation_crossover(parent1, parent2, all_prs, mutation_rate=0.2):
     return child
 
 
-def apply_mutation(possible_solution, all_prs, route_change_rate=0.6, reclustering_rate=0.3):
+def apply_mutation(possible_solution, all_prs, route_change_rate=0.8, reclustering_rate=0.5):
     """
     Mutation Method
     Applies slight random Mutation on existing solutions
@@ -63,7 +63,9 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.6, reclusteri
     # Mutation 2: Route PR Goals
     for route in new_possible_solution.routes:
         if random.random() < route_change_rate:
-            route.pr_id = random.choice(all_prs)
+            available_edges = [edge for edge in new_possible_solution.edges_list if edge["from"] == route.RA]
+            weights = [1 / float(edge["distance_km"]) for edge in available_edges]
+            route.PR = random.choices(available_edges, weights=weights, k=1)[0]["to"]
 
     return new_possible_solution
      

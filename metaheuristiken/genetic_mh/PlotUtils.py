@@ -58,6 +58,7 @@ def plot_loss_dict(path):
     value1_list = []
     value2_list = []
     value3_list = []
+    value4_list = []
 
     dict_file = os.path.join(path, "best_solution_loss_dict.csv")
 
@@ -68,6 +69,7 @@ def plot_loss_dict(path):
             value1_list.append(tup[0])
             value2_list.append(tup[1])
             value3_list.append(tup[2])
+            value4_list.append(tup[3])
 
     # X-axis is just the generation/index
     x = list(range(len(value1_list)))
@@ -77,6 +79,7 @@ def plot_loss_dict(path):
     plt.plot(x, value1_list, label='Street Cap Overflow')
     plt.plot(x, value2_list, label='PR Overflow')
     plt.plot(x, value3_list, label='Time (normalized)')
+    plt.plot(x, value4_list, label='cluster size std')
 
     plt.xlabel("Generation")
     plt.ylabel("Metric Value")

@@ -1,8 +1,9 @@
 class Cluster(object):
-    def __init__(self, cluster_mapper, ra_ids, start_time=0):
+    def __init__(self, cluster_mapper, ra_ids, size, start_time=0):
         self.cluster_mapper = cluster_mapper
         self.start_time = start_time
         self.ra_ids = ra_ids
+        self.size = size 
 
 
     def __repr__(self):

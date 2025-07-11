@@ -2,6 +2,7 @@ import math
 from copy import deepcopy
 import random
 from metaheuristiken.genetic_mh.Cluster import Cluster
+import numpy as np
 
 class ClusterMapper():
     """
@@ -26,7 +27,8 @@ class ClusterMapper():
             new_cluster = Cluster(
                 start_time = max_start_time, 
                 cluster_mapper = self,
-                ra_ids = [ra["id"] for ra in selected]
+                ra_ids = [ra["id"] for ra in selected],
+                size = np.sum([ra["population"] for ra in selected])
             )
             clusters.append(new_cluster)
             areas_to_evacuate = [o for o in areas_to_evacuate if o not in selected]
@@ -36,7 +38,7 @@ class ClusterMapper():
 
     def recluster_population(self):
         """
-        Keeps the cluster timin but reorders the RAs in it
+        Keeps the cluster start_times but reorders the RAs in it
         """
         # TODO this method can be somhow combined with the get_random_cluster_distribution function (duplicated code fragments)
         cluster_size = math.floor(len(self.ra_list) / self.num_clusters)
