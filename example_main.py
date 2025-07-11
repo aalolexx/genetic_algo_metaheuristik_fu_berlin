@@ -10,11 +10,13 @@ INSTANZEN_VERZEICHNIS = os.path.join("data", "input")
 OUTPUT_VERZEICHNIS = os.path.join("data", "output")
 CONFIG_VERZEICHNIS = "config"
 
+
 def lade_konfiguration_aus_json(config_json):
     """
     Lädt Konfigurationsparameter aus einer JSON-String
     """
     return json.loads(config_json)
+
 
 def lade_daten_aus_json(dateipfad):
     """
@@ -26,6 +28,8 @@ def lade_daten_aus_json(dateipfad):
     except Exception as e:
         raise RuntimeError(f"Fehler beim Laden der Instanzdatei: {e}")
     return tmp_eingabe_daten
+
+
 #%%
 def main():
     eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "example_evacuation_data.json"))
@@ -50,8 +54,8 @@ def main():
 
     # todo remove the follinwg, just for local testing
     mh[0].initialisiere()
-    for i in range(500):
-        print(f"ITERATION {i}/500")
+    for i in range(200):
+        print(f"ITERATION {i}/200")
         mh[0].iteriere()
         mh[0].speichere_zwischenergebnis()
     
@@ -61,6 +65,7 @@ def main():
     plot_loss_dict(DURCHLAUF_VERZEICHNIS)
     plot_routes_timeline(DURCHLAUF_VERZEICHNIS, best_solution.routes)
     plot_people_on_street(DURCHLAUF_VERZEICHNIS, best_solution.routes, mh[0].max_street_capacity)
+
 
 if __name__ == "__main__":
     main()

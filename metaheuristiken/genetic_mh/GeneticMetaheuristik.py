@@ -27,73 +27,16 @@ class GeneticMetaheuristik(Metaheuristik):
         self.pr_list = self.eingabe_daten["places_of_refuge"]
         self.edges_list = self.eingabe_daten["edges"]
 
-        pr_ids = [por["id"] for por in self.pr_list]
-
         city_population = sum([ra["population"] for ra in self.ra_list])
-        # set upper boarder for start time by (population (city population size * longest edge)
-        #todo: think about how to set this. Too high: probably increases computation time. Too low: street_capacity is exceeded too often -> low fittness
-        upper_start_time_border = max([int(e["distance_km"]) for e in self.edges_list])* 1000 * (city_population - 1) * self.konfiguration["street_capacity"] # " - 1" because only the start time is relevant here
         self.max_street_capacity = math.ceil(self.konfiguration["street_capacity"] * city_population)
 
-        step = 10 #the data is accurate to 10 meters, so we are iterating over looks with step = 10
+        # check if the problem is solvable with the given amount of clusters
+        assert city_population / self.konfiguration["num_clusters"] < self.max_street_capacity, "You need more clusters to stay under the street_overflow bound"
 
         first_generation = Generation()
         for i in range(self.konfiguration["population_size"]): #"population_size" as in: population of solutions, not city_population
-            #create a random initial solution
-            start = time.time()
-            rescue_routes = []
-            for ra in self.ra_list:
-                for human in range(0,ra["population"]):
-                    target_rp_id = random.choice(pr_ids)
-                    distance = [int(edge["distance_km"]) for edge in self.edges_list if edge["from"]==ra["id"] and edge["to"]==target_rp_id][0] * 1000
-                    rescue_routes.append(
-                        #Route(ra["id"], target_rp_id, random.randrange(0, int(upper_start_time_border + 1), step), distance)
-                        Route(ra["id"], target_rp_id, 0, distance)
-                    )
-
-            end = time.time()
-            print(f"time to generate random solution {i + 1}/{self.konfiguration['population_size']}:", end - start)
-
-            ### close gaps where noone is moving
-            if False: # it almost takes forever
-                # track time for closing gaps...if it takes too long then we need to think about this again
-                start = time.time()
-
-                max_t = max([(r.start_time + r.distance) for r in rescue_routes])
-
-                noone_is_on_street_counter = 0
-                adjustment_for_shifting = 0
-
-                # iterate through whole timeframe to find gaps
-                for t in range(0, max_t, step):
-                    t = t - adjustment_for_shifting
-                    print("t: ", t, "/", max_t)
-
-                    people_on_street = len([r for r in rescue_routes if r.start_time <= t < (r.start_time + r.distance)])
-                    if people_on_street==0:
-                        noone_is_on_street_counter += step
-
-                    # if gap end found
-                    if people_on_street > 0 and noone_is_on_street_counter!=0:
-                        #shift all routes forward that are not in the past
-                        move_forward = [r for r in rescue_routes if r.start_time >= t]
-                        for m in move_forward:
-                            m.set_start_time(m.start_time - noone_is_on_street_counter)
-
-                        adjustment_for_shifting += noone_is_on_street_counter
-                        max_t -= noone_is_on_street_counter
-                        noone_is_on_street_counter = 0
-
-                end = time.time()
-                print(f"time to close gaps for random solution {i + 1}/{self.konfiguration['population_size']}:", end - start)
-
-            first_generation.append(
-                PossibleSolution(
-                    routes = rescue_routes,
-                    max_street_capacity = self.max_street_capacity,
-                    all_prs = self.pr_list
-                )
-            )
+            possible_solution = GeneticUtils.create_new_possible_solution(self.pr_list, self.ra_list, self.edges_list, self.max_street_capacity, self.konfiguration["num_clusters"])
+            first_generation.append(possible_solution)
             
         first_generation.set_losses()
         self.generations.append(first_generation)
@@ -106,25 +49,34 @@ class GeneticMetaheuristik(Metaheuristik):
         latest_generation = self.generations[-1]
         new_generation = Generation()
 
-        num_elits = 10
-        num_explorative_mutants = 10 # Idea: Use this for explortation
-        num_crossovers = len(latest_generation) - (num_elits + num_explorative_mutants)
-        
+        num_childs = self.konfiguration["population_size"]
+        num_crossovers =  math.floor(num_childs * 0.2)
+        num_explorative_mutants = math.floor(num_childs * 0.5)
+        num_new_random_solutions = math.floor(num_childs * 0.2)
+        num_elits = math.floor(num_childs * 0.1)
+
+        # CROSSOVERS
         for i in range(num_crossovers):
             parent1, parent2 = GeneticUtils.select_two_by_roulette(latest_generation)
             child = GeneticUtils.mutation_crossover(parent1, parent2, self.pr_list)
             new_generation.append(child)
 
-        # get and add the single best solution --> elitismus
-        elits = sorted(latest_generation, key=lambda p: p.loss)[:10]
+        # EXPLORATIVE MUTANTS
+        for i in range(num_explorative_mutants):
+            parent1, _ = GeneticUtils.select_two_by_roulette(latest_generation)
+            child = GeneticUtils.apply_mutation(parent1, self.pr_list)
+            new_generation.append(child)
+
+        # RANDOM NEW SOLUTIONS
+        for i in range(num_new_random_solutions):
+            child = GeneticUtils.create_new_possible_solution(self.pr_list, self.ra_list, self.edges_list, self.max_street_capacity, self.konfiguration["num_clusters"])
+            new_generation.append(child)
+
+        # ELITS
+        elits = sorted(latest_generation, key=lambda p: p.loss)[:num_elits]
         new_generation += elits
 
-        # Add strong random mutations for exploration
-        for i in range(num_explorative_mutants):
-            random_ind = random.choice(latest_generation)
-            new_ind = GeneticUtils.apply_explorative_mutation(random_ind, self.pr_list)
-            new_generation.append(new_ind)
-        
+        # Set losses
         new_generation.set_losses()
         self.generations.append(new_generation)
 

@@ -1,18 +1,26 @@
 from metaheuristiken.genetic_mh.Route import Route
 from metaheuristiken.genetic_mh.GlobalTracker import GlobalTracker
+from metaheuristiken.genetic_mh.ClusterMapper import ClusterMapper
 from copy import deepcopy
 import numpy as np
 
 class PossibleSolution:
-    def __init__(self, routes, max_street_capacity, all_prs):
+    def __init__(self, pr_list, ra_list, num_clusters, max_street_capacity, routes=[]):
         self.routes = routes
         self.loss = float("inf") # goal: loss = 0
         self.max_street_capacity = max_street_capacity
-        self.all_prs = all_prs
+        self.pr_list = pr_list
+        self.ra_list = ra_list
+        self.num_clusters = num_clusters
+        self.cluster_mapper = ClusterMapper(self.ra_list, num_clusters)
 
 
     def __repr__(self):
         return f"{self.__class__.__name__}(#routes={len(self.routes)}, loss={self.loss}, street_cap={self.max_street_capacity})"
+
+
+    def set_routes(self, routes):
+        self.routes = routes
 
 
     def set_loss(self):
@@ -27,10 +35,16 @@ class PossibleSolution:
         population_size = len(self.routes)
         normalized_street_overflow = street_overflow_sum / self.max_street_capacity / population_size
 
-        sum_pr_overflows = self.get_sum_pr_overflows(self.all_prs)
+        sum_pr_overflows = self.get_sum_pr_overflows()
         normalized_pr_overflow = sum_pr_overflows / population_size
 
-        return (10 * normalized_street_overflow) + 1, 10 * normalized_pr_overflow, normalized_time
+        weighted_time = normalized_time
+
+        # make sure these two are never lower than the time loss since they are a survival must have
+        weighted_street_overflow = max((10 * normalized_street_overflow), weighted_time) + 1
+        weighted_pr_overflow = max(10 * normalized_pr_overflow, weighted_time) + 1
+
+        return weighted_street_overflow, weighted_pr_overflow, weighted_time
 
     #
     # Analysis Functions
@@ -43,8 +57,8 @@ class PossibleSolution:
         longest_distance = 0
 
         for route in self.routes:
-            enter_time = route.start_time
-            exit_time = route.start_time + route.distance
+            enter_time = route.cluster.start_time
+            exit_time = route.cluster.start_time + route.distance
 
             events.append((enter_time, 1))   # person enters street
             events.append((exit_time, -1))  # person leaves street
@@ -78,10 +92,10 @@ class PossibleSolution:
 
     # gets the amount of PR overflows
     # -> Should be used to optimize PR selection
-    def get_sum_pr_overflows(self, all_prs):
+    def get_sum_pr_overflows(self):
         sum_pr_overflows = 0
 
-        prs_with_usage = all_prs.copy()
+        prs_with_usage = self.pr_list.copy()
         for pr in prs_with_usage:
             pr['current_usage'] = 0
 

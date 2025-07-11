@@ -100,7 +100,7 @@ def plot_routes_timeline(path, routes, max_routes=800):
     pr_to_color = {pr: colors(i) for i, pr in enumerate(unique_prs)}
 
     for idx, route in enumerate(routes):
-        start = route.start_time
+        start = route.cluster.start_time
         ax.broken_barh(
             [(start, route.distance)],
             (idx - 0.4, 0.8),
@@ -121,8 +121,8 @@ def plot_people_on_street(path, routes, your_max_capacity, step_size=10):
     time_events = []
 
     for route in routes:
-        start = route.start_time
-        end = route.start_time + route.distance
+        start = route.cluster.start_time
+        end = route.cluster.start_time + route.distance
         time_events.append((start, +1))
         time_events.append((end, -1))
 
