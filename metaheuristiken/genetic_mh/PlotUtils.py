@@ -2,8 +2,11 @@ import matplotlib.pyplot as plt
 import os
 import random
 import matplotlib.cm as cm
+import csv
+import json
+import ast
 import matplotlib.colors as mcolors
-
+from collections import defaultdict
 
 def plot_losses(path):
     """
@@ -88,7 +91,7 @@ def plot_loss_dict(path):
     print(f"Plot saved to: {output_path}")
 
 
-def plot_routes_timeline(path, routes, max_routes=800):
+def plot_routes_timeline(path, routes, max_routes=500):
     if len(routes) > max_routes:
         routes = random.sample(routes, max_routes)
 
@@ -147,5 +150,59 @@ def plot_people_on_street(path, routes, your_max_capacity, step_size=10):
     
     # Save the plot instead of showing it
     output_path = os.path.join(path, "people_on_street_heatmap.png")
+    plt.savefig(output_path)
+    print(f"Plot saved to: {output_path}")
+
+
+def plot_generation_birthtype_loss(path):
+    file_path = os.path.join(path, "detailed_generation_loss.csv")
+    output_path = os.path.join(path, "generation_birthtype_loss.png")
+    generations = []
+
+    # Read and parse file line by line
+    with open(file_path, "r") as file:
+        for idx, line in enumerate(file):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                generation = ast.literal_eval(line)
+                generations.append(generation)
+            except Exception as e:
+                print(f"⚠️ Failed to parse line {idx + 1}: {e}")
+                continue
+
+    # Organize data for fast plotting
+    birth_type_data = defaultdict(lambda: {"x": [], "y": []})
+
+    for gen_idx, generation in enumerate(generations):
+        for ind in generation:
+            bt = ind["birth_type"]
+            loss = ind["loss"]
+            birth_type_data[bt]["x"].append(gen_idx)
+            birth_type_data[bt]["y"].append(loss)
+
+    # Setup color map
+    birth_types = sorted(birth_type_data.keys())
+    cmap = cm.get_cmap("rainbow", len(birth_types))
+    color_map = {bt: cmap(i) for i, bt in enumerate(birth_types)}
+
+    # Plot all points in bulk per birth_type
+    fig, ax = plt.subplots(figsize=(14, 8))
+    for bt in birth_types:
+        ax.scatter(
+            birth_type_data[bt]["x"],
+            birth_type_data[bt]["y"],
+            color=color_map[bt],
+            label=bt,
+            alpha=0.4,
+            s=10
+        )
+
+    ax.set_xlabel("Generation")
+    ax.set_ylabel("Loss")
+    ax.set_title("Loss by Generation and Birth Type")
+    ax.legend(title="Birth Type", loc="best")
+    plt.tight_layout()
     plt.savefig(output_path)
     print(f"Plot saved to: {output_path}")

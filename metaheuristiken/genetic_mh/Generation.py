@@ -14,3 +14,12 @@ class Generation(list):
 
     def average_loss(self):
         return sum(ind.loss for ind in self) / len(self)
+    
+    def dict_all_inds_loss(self):
+        losses = []
+        for ind in self:
+            losses.append({
+                "birth_type": ind.birth_type,
+                "loss": ind.loss
+            })
+        return losses

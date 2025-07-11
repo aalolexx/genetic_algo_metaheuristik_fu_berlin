@@ -22,6 +22,7 @@ def mutation_crossover(parent1, parent2, all_prs, mutation_rate=0.2):
     
     # Take the first parent as a base --> clusters can't be mixed randomly but have to stay consistend
     child = deepcopy(parent1)
+    child.birth_type = "crossover" 
 
     # Mix the routes goal PRs
     crossover_point = random.randint(1, len(parent1.routes) - 1)
@@ -36,16 +37,23 @@ def mutation_crossover(parent1, parent2, all_prs, mutation_rate=0.2):
     # Apply mutation randomly depending on mutation rate in crossover
     if random.random() < mutation_rate:
         child = apply_mutation(child, all_prs)
+        child.birth_type = "crossover_mutated" 
 
     return child
 
 
-def apply_mutation(possible_solution, all_prs, route_change_rate=0.5):
+def apply_mutation(possible_solution, all_prs, route_change_rate=0.6, reclustering_rate=0.3):
     """
     Mutation Method
     Applies slight random Mutation on existing solutions
     """
     new_possible_solution = deepcopy(possible_solution)
+    new_possible_solution.birth_type = "mutation"
+
+    # Mutation 1: Reorer the cluster distribution
+    if random.random() > reclustering_rate:
+        new_possible_solution.cluster_mapper.recluster_population()
+        new_possible_solution.birth_type = "mutation_reclustered" # todo remove
 
     # Mutation 1: Cluster Start Times
     for cluster in new_possible_solution.cluster_mapper.clusters:
@@ -54,8 +62,8 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.5):
 
     # Mutation 2: Route PR Goals
     for route in new_possible_solution.routes:
-        #if random.random() < route_change_rate:
-        route.pr_id = random.choice(all_prs)
+        if random.random() < route_change_rate:
+            route.pr_id = random.choice(all_prs)
 
     return new_possible_solution
      
@@ -69,7 +77,9 @@ def create_new_possible_solution(pr_list, ra_list, edges_list, max_street_capaci
         max_street_capacity = max_street_capacity,
         pr_list = pr_list,
         ra_list =  ra_list,
-        num_clusters = num_clusters # TODO CONF
+        edges_list = edges_list,
+        num_clusters = num_clusters,
+        birth_type="new_random"
     )
 
     pr_ids = [por["id"] for por in pr_list]

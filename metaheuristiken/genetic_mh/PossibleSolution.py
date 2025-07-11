@@ -5,19 +5,26 @@ from copy import deepcopy
 import numpy as np
 
 class PossibleSolution:
-    def __init__(self, pr_list, ra_list, num_clusters, max_street_capacity, routes=[]):
+    def __init__(self, pr_list, ra_list, edges_list, num_clusters, max_street_capacity, routes=[], birth_type=""):
         self.routes = routes
         self.loss = float("inf") # goal: loss = 0
         self.max_street_capacity = max_street_capacity
         self.pr_list = pr_list
         self.ra_list = ra_list
+        self.edges_list = edges_list
         self.num_clusters = num_clusters
-        self.cluster_mapper = ClusterMapper(self.ra_list, num_clusters)
+        
+        # initialize cluster
+        max_start_time = np.mean([edge["distance_km"] for edge in self.edges_list]) * self.num_clusters # heuristic - TODO can be optimized
+        self.cluster_mapper = ClusterMapper(self.ra_list, self.num_clusters, max_start_time)
+
+        # For Analysis / Debugging
+        self.birth_type = birth_type
 
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(#routes={len(self.routes)}, loss={self.loss}, street_cap={self.max_street_capacity})"
-
+        return f"{self.__class__.__name__}(#routes={len(self.routes)}, loss={self.loss}, street_cap={self.max_street_capacity})"        
+        
 
     def set_routes(self, routes):
         self.routes = routes
@@ -39,10 +46,8 @@ class PossibleSolution:
         normalized_pr_overflow = sum_pr_overflows / population_size
 
         weighted_time = normalized_time
-
-        # make sure these two are never lower than the time loss since they are a survival must have
-        weighted_street_overflow = max((10 * normalized_street_overflow), weighted_time) + 1
-        weighted_pr_overflow = max(10 * normalized_pr_overflow, weighted_time) + 1
+        weighted_street_overflow = normalized_street_overflow * 20 + 2
+        weighted_pr_overflow = normalized_pr_overflow * 10 * 2
 
         return weighted_street_overflow, weighted_pr_overflow, weighted_time
 

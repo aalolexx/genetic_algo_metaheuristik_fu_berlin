@@ -2,7 +2,7 @@ import os
 import json
 from hashlib import md5
 from metaheuristiken.genetic_mh.GeneticMetaheuristik import GeneticMetaheuristik
-from metaheuristiken.genetic_mh.PlotUtils import plot_losses, plot_routes_timeline, plot_people_on_street, plot_loss_dict
+from metaheuristiken.genetic_mh.PlotUtils import plot_losses, plot_routes_timeline, plot_people_on_street, plot_loss_dict, plot_generation_birthtype_loss
 import time
 
 # Verzeichnisse
@@ -32,7 +32,7 @@ def lade_daten_aus_json(dateipfad):
 
 #%%
 def main():
-    eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "example_evacuation_data.json"))
+    eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "small_evacuation_data.json"))
 
     CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'genetic_mh_config.json')
 
@@ -54,8 +54,8 @@ def main():
 
     # todo remove the follinwg, just for local testing
     mh[0].initialisiere()
-    for i in range(200):
-        print(f"ITERATION {i}/200")
+    for i in range(150):
+        print(f"ITERATION {i}/150")
         mh[0].iteriere()
         mh[0].speichere_zwischenergebnis()
     
@@ -65,6 +65,7 @@ def main():
     plot_loss_dict(DURCHLAUF_VERZEICHNIS)
     plot_routes_timeline(DURCHLAUF_VERZEICHNIS, best_solution.routes)
     plot_people_on_street(DURCHLAUF_VERZEICHNIS, best_solution.routes, mh[0].max_street_capacity)
+    plot_generation_birthtype_loss(DURCHLAUF_VERZEICHNIS)
 
 
 if __name__ == "__main__":

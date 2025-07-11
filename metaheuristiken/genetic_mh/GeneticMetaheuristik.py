@@ -1,7 +1,6 @@
 from basis.metaheuristik import Metaheuristik
 import random
 from metaheuristiken.genetic_mh.Route import Route
-from metaheuristiken.genetic_mh.PossibleSolution import PossibleSolution
 from metaheuristiken.genetic_mh.Generation import Generation
 from metaheuristiken.genetic_mh import GeneticUtils
 import math
@@ -50,10 +49,10 @@ class GeneticMetaheuristik(Metaheuristik):
         new_generation = Generation()
 
         num_childs = self.konfiguration["population_size"]
-        num_crossovers =  math.floor(num_childs * 0.2)
-        num_explorative_mutants = math.floor(num_childs * 0.5)
-        num_new_random_solutions = math.floor(num_childs * 0.2)
-        num_elits = math.floor(num_childs * 0.1)
+        num_crossovers =  math.floor(num_childs * 0.3)
+        num_explorative_mutants = math.floor(num_childs * 0.4)
+        num_new_random_solutions = math.floor(num_childs * 0.1)
+        num_elits = math.floor(num_childs * 0.2)
 
         # CROSSOVERS
         for i in range(num_crossovers):
@@ -74,6 +73,8 @@ class GeneticMetaheuristik(Metaheuristik):
 
         # ELITS
         elits = sorted(latest_generation, key=lambda p: p.loss)[:num_elits]
+        for elit in elits:
+            elit.birth_type = "elit"
         new_generation += elits
 
         # Set losses
@@ -98,10 +99,10 @@ class GeneticMetaheuristik(Metaheuristik):
         avg_loss = self.generations[-1].average_loss()
         best_solution = self.generations[-1].get_best()
 
-        # add the losses to our logfiles
         avg_path = os.path.join(self.durchlauf_verzeichnis, "average_losses.csv")
         best_path = os.path.join(self.durchlauf_verzeichnis, "best_losses.csv")
         best_solution_path = os.path.join(self.durchlauf_verzeichnis, "best_solution_loss_dict.csv")
+        detailed_generation_loss_path = os.path.join(self.durchlauf_verzeichnis, f"detailed_generation_loss.csv")
 
         with open(avg_path, 'a') as f_avg:
             f_avg.write(f"{avg_loss}\n")
@@ -111,5 +112,8 @@ class GeneticMetaheuristik(Metaheuristik):
 
         with open(best_solution_path, 'a') as f_best:
             f_best.write(f"{best_solution.get_loss_dict()}\n")
+
+        with open(detailed_generation_loss_path, 'a') as f_best:
+            f_best.write(f"{self.generations[-1].dict_all_inds_loss()}\n")
 
         print(f"Logged average: {avg_loss}, best: {best_solution.loss}")
