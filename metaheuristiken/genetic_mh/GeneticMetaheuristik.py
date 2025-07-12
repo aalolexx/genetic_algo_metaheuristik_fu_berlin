@@ -49,9 +49,9 @@ class GeneticMetaheuristik(Metaheuristik):
         new_generation = Generation()
 
         num_childs = self.konfiguration["population_size"]
-        num_crossovers =  math.floor(num_childs * 0.3)
-        num_explorative_mutants = math.floor(num_childs * 0.4)
-        num_new_random_solutions = math.floor(num_childs * 0.1)
+        num_crossovers =  math.floor(num_childs * 0.25)
+        num_explorative_mutants = math.floor(num_childs * 0.5)
+        num_new_random_solutions = math.floor(num_childs * 0.05)
         num_elits = math.floor(num_childs * 0.2)
 
         # CROSSOVERS

@@ -2,6 +2,7 @@ import random
 from copy import deepcopy
 from metaheuristiken.genetic_mh.PossibleSolution import PossibleSolution
 from metaheuristiken.genetic_mh.Route import Route
+import numpy as np
 
 def select_two_by_roulette(population):
     """
@@ -42,7 +43,7 @@ def mutation_crossover(parent1, parent2, all_prs, mutation_rate=0.2):
     return child
 
 
-def apply_mutation(possible_solution, all_prs, route_change_rate=0.8, reclustering_rate=0.5):
+def apply_mutation(possible_solution, all_prs, route_change_rate=0.5, reclustering_rate=0.5):
     """
     Mutation Method
     Applies slight random Mutation on existing solutions
@@ -50,22 +51,52 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.8, reclusteri
     new_possible_solution = deepcopy(possible_solution)
     new_possible_solution.birth_type = "mutation"
 
+    # ---------
     # Mutation 1: Reorer the cluster distribution
-    if random.random() > reclustering_rate:
-        new_possible_solution.cluster_mapper.recluster_population()
-        new_possible_solution.birth_type = "mutation_reclustered" # todo remove
+    if random.random() > reclustering_rate: 
+        k = random.random()
+        if k < 0.2:
+            new_possible_solution.cluster_mapper.recluster_population()
+        else:
+            for ra in new_possible_solution.ra_list:
+                if random.random() < 0.3: # todo maybe configurable but its neglectable
+                    new_possible_solution.cluster_mapper.random_switch_ra(ra["id"])
 
-    # Mutation 1: Cluster Start Times
+    # ---------
+    # Mutation 2: Cluster Start Times
     for cluster in new_possible_solution.cluster_mapper.clusters:
         cluster.start_time += random.randrange(-100, 100) * 10 # todo set step size variable
         cluster.start_time = max(0, cluster.start_time)
 
-    # Mutation 2: Route PR Goals
+    # ---------
+    # Mutation 3: Route PR Goals
+
+    # precompute selection weights
+    ra_edge_selection_weights = {}
+    for ra in set(route.RA for route in new_possible_solution.routes):
+        available_edges = [edge for edge in new_possible_solution.edges_list if edge["from"] == ra]
+
+        weights_distance = np.array([1 / float(edge["distance_km"]) for edge in available_edges])
+        normalized_weights_distance = (weights_distance - np.min(weights_distance)) / (np.max(weights_distance) - np.min(weights_distance))
+
+        weights_capacity = np.array([next(pr for pr in all_prs if pr["id"] == edge["to"])["capacity"] for edge in available_edges])
+        normalized_weights_capacity = (weights_capacity - np.min(weights_capacity)) / (np.max(weights_capacity) - np.min(weights_capacity))
+
+        ra_edge_selection_weights[ra] = {
+            "edges": available_edges,
+            "distance_weights": normalized_weights_distance,
+            "capacity_weights": normalized_weights_capacity,
+        }
+        
+    # than update route PR based on weights and mutation rate
     for route in new_possible_solution.routes:
         if random.random() < route_change_rate:
-            available_edges = [edge for edge in new_possible_solution.edges_list if edge["from"] == route.RA]
-            weights = [1 / float(edge["distance_km"]) for edge in available_edges]
-            route.PR = random.choices(available_edges, weights=weights, k=1)[0]["to"]
+            data = ra_edge_selection_weights[route.RA]
+            edges = data["edges"]
+            weights = 0.2 * data["distance_weights"] + 4 * data["capacity_weights"]
+
+            # Sample new edge based on combined weights
+            route.PR = random.choices(edges, weights=weights, k=1)[0]["to"]
 
     return new_possible_solution
      

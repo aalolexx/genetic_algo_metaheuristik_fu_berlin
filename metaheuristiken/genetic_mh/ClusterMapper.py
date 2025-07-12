@@ -18,23 +18,46 @@ class ClusterMapper():
         """
         Randomly distribute all RAs into the given amount of clusters
         """
-        cluster_size = math.ceil(len(self.ra_list) / self.num_clusters)
-        clusters = []
-        areas_to_evacuate = deepcopy(self.ra_list)
+        # Shuffle to add randomness and avoid bias
+        shuffled_ras = random.sample(self.ra_list, len(self.ra_list))
 
-        for _ in range(self.num_clusters):
-            selected = random.sample(areas_to_evacuate, cluster_size if len(areas_to_evacuate) >= cluster_size else len(areas_to_evacuate))
+        # Init containers
+        clusters = [[] for _ in range(self.num_clusters)]
+        cluster_populations = [0] * self.num_clusters
+
+        # Assign RAs to cluster with currently lowest population
+        for ra in shuffled_ras:
+            idx = cluster_populations.index(min(cluster_populations))
+            clusters[idx].append(ra)
+            cluster_populations[idx] += ra["population"]
+
+        # Build Cluster objects
+        result = []
+        for i, ra_group in enumerate(clusters):
             new_cluster = Cluster(
-                start_time = max_start_time, 
-                cluster_mapper = self,
-                ra_ids = [ra["id"] for ra in selected],
-                size = np.sum([ra["population"] for ra in selected])
+                start_time=max_start_time,
+                cluster_mapper=self,
+                ra_ids=[ra["id"] for ra in ra_group],
+                size=sum(ra["population"] for ra in ra_group)
             )
-            clusters.append(new_cluster)
-            areas_to_evacuate = [o for o in areas_to_evacuate if o not in selected]
+            result.append(new_cluster)
 
-        return clusters
+        return result
     
+
+    def random_switch_ra(self, ra_id):
+        """
+        Finds the cluster with a given RA ID and adds it to another random cluster
+        """
+        cluster_with_ra = next((c for c in self.clusters if ra_id in c.ra_ids), None)
+        if cluster_with_ra is None:
+            return # can happen if it's been removed in the same mutation
+
+        weights = [c.size for c in self.clusters]
+        random_cluster = random.choices(self.clusters, weights=weights, k=1)[0]
+        cluster_with_ra.ra_ids.remove(ra_id)
+        random_cluster.ra_ids.append(ra_id)
+
 
     def recluster_population(self):
         """

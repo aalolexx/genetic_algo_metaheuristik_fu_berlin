@@ -209,3 +209,46 @@ def plot_generation_birthtype_loss(path):
     plt.tight_layout()
     plt.savefig(output_path)
     print(f"Plot saved to: {output_path}")
+
+
+def plot_pr_usage_vs_capacity(path, routes, pr_list):
+    output_path = os.path.join(path, "pr_usages.png")
+
+    # Initialize PR usage dictionary
+    pr_usage = {pr['id']: 0 for pr in pr_list}
+    pr_capacity = {pr['id']: pr['capacity'] for pr in pr_list}
+
+    # Count how many people are assigned to each PR
+    for route in routes:
+        if route.PR in pr_usage:
+            pr_usage[route.PR] += 1
+        else:
+            print(f"Warning: PR {route.PR} not found in PR list")
+
+    # Sort PRs for consistent plotting
+    pr_ids = sorted(pr_usage.keys())
+
+    usage = [pr_usage[pr_id] for pr_id in pr_ids]
+    capacities = [pr_capacity[pr_id] for pr_id in pr_ids]
+
+    x = range(len(pr_ids))
+
+    # Plotting
+    plt.figure(figsize=(14, 6))
+    plt.bar(x, capacities, width=0.4, label='Capacity', align='center', color='lightgray', edgecolor='black')
+    plt.bar(x, usage, width=0.4, label='Current Usage', align='edge', color='steelblue')
+
+    # Highlight overflows
+    for i, (u, c) in enumerate(zip(usage, capacities)):
+        if u > c:
+            plt.bar(i, u - c, width=0.4, bottom=c, alpha=0.3, color='red', label='Overflow' if i == 0 else "")
+
+    plt.xticks(x, pr_ids, rotation=45)
+    plt.xlabel('PR ID')
+    plt.ylabel('Number of Assigned People')
+    plt.title('PR Usage vs Capacity')
+    plt.legend()
+    plt.tight_layout()
+
+    plt.savefig(output_path)
+    print(f"Saved plot to {output_path}")
