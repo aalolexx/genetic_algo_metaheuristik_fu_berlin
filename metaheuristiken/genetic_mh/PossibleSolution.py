@@ -3,6 +3,8 @@ from metaheuristiken.genetic_mh.GlobalTracker import GlobalTracker
 from metaheuristiken.genetic_mh.ClusterMapper import ClusterMapper
 from copy import deepcopy
 import numpy as np
+import json
+import os
 
 class PossibleSolution:
     def __init__(self, pr_list, ra_list, edges_list, num_clusters, max_street_capacity, routes=[], birth_type=""):
@@ -15,7 +17,7 @@ class PossibleSolution:
         self.num_clusters = num_clusters
         
         # initialize cluster
-        max_start_time = np.mean([edge["distance_km"] for edge in self.edges_list]) * self.num_clusters # heuristic - TODO can be optimized
+        max_start_time = max([edge["distance_km"] for edge in self.edges_list]) * self.num_clusters # heuristic - TODO can be optimized
         self.cluster_mapper = ClusterMapper(self.ra_list, self.num_clusters, max_start_time)
 
         # For Analysis / Debugging
@@ -46,8 +48,9 @@ class PossibleSolution:
         normalized_pr_overflow = sum_pr_overflows / population_size
 
         weighted_time = normalized_time
-        weighted_street_overflow = normalized_street_overflow * 15
-        weighted_pr_overflow = normalized_pr_overflow * 15
+        # make sure these two are always maximum penalized
+        weighted_street_overflow = 0 if normalized_street_overflow == 0 else  normalized_street_overflow * 10 + weighted_time * 2
+        weighted_pr_overflow = 0 if normalized_pr_overflow == 0 else normalized_pr_overflow * 5 + weighted_time
 
         return weighted_street_overflow, weighted_pr_overflow, weighted_time
 
@@ -111,3 +114,42 @@ class PossibleSolution:
                 sum_pr_overflows += pr['current_usage'] - pr['capacity']
 
         return sum_pr_overflows
+    
+
+    #
+    # Export
+    #
+    def export_as_json(self, output_folder, filename="best_solution_export.json"):
+        """
+        Export a PossibleSolution object as a JSON file.
+        """
+        def route_to_dict(route):
+            return {
+                "ra_id": route.RA,
+                "pr_id": route.PR,
+                "distance": route.distance,
+                "cluster_start_time": route.cluster.start_time
+            }
+
+        def cluster_to_dict(cluster):
+            return {
+                "start_time": cluster.start_time,
+                "ra_ids": cluster.ra_ids,
+                "size": cluster.size
+            }
+
+        export_data = {
+            "loss": self.loss,
+            "routes": [route_to_dict(route) for route in self.routes],
+            "pr_list": self.pr_list,
+            "ra_list": self.ra_list,
+            "edges_list": self.edges_list,
+            "clusters": [cluster_to_dict(c) for c in self.cluster_mapper.clusters]
+        }
+
+        export_path = os.path.join(output_folder, filename)
+        os.makedirs(os.path.dirname(export_path), exist_ok=True)
+        with open(export_path, "w") as f:
+            json.dump(export_data, f, indent=2)
+
+        print(f"Possible solution exported to {export_path}")

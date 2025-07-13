@@ -209,8 +209,8 @@ def plot_generation_birthtype_loss(path, top_y=None):
             birth_type_data[bt]["y"],
             color=color_map[bt],
             label=bt,
-            alpha=0.4,
-            s=10
+            alpha=0.75,
+            s=20
         )
 
     ax.set_xlabel("Generation")

@@ -32,7 +32,7 @@ def lade_daten_aus_json(dateipfad):
 
 #%%
 def main():
-    eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "middle_evacuation_data.json"))
+    eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "small_evacuation_data.json"))
 
     CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'genetic_mh_config.json')
 
@@ -79,6 +79,7 @@ def main():
             break
     
     best_solution = mh[0].bewerte_loesung()
+    best_solution.export_as_json(DURCHLAUF_VERZEICHNIS)
     plot_losses(DURCHLAUF_VERZEICHNIS)
     plot_loss_dict(DURCHLAUF_VERZEICHNIS)
     plot_routes_timeline(DURCHLAUF_VERZEICHNIS, best_solution.routes)

@@ -1,7 +1,13 @@
+import random
+
 def repair_possible_solution(possible_solution):
     """
     Fix overflown PRs by redistributing routes to underutilized PRs with available capacity.
+    Also tries to fix the street capacity overflow
     """
+    # ------
+    #  Repair PR Distribution
+
     # Count current PR usage
     pr_usage = {pr["id"]: 0 for pr in possible_solution.pr_list}
     for route in possible_solution.routes:
@@ -18,7 +24,7 @@ def repair_possible_solution(possible_solution):
         if edge["to"] in underused_prs:
             ra_to_pr_edges.setdefault(edge["from"], []).append({
                 "to": edge["to"],
-                "distance": int(edge["distance_km"]) * 1000  # convert to meters
+                "distance": float(edge["distance_km"]) * 1000  # convert to meters
             })
 
     # Reassign routes from overflown PRs
@@ -40,5 +46,24 @@ def repair_possible_solution(possible_solution):
                     route.PR = pr_id
                     pr_usage[pr_id] += 1
                     break  # move to next route
+
+
+    # ------
+    #  Repair Street Capacity Overflow
+    attempt = 0
+    max_attempts = 5
+    while attempt < max_attempts:
+        amount_overflow, overflow_sum, norm_time, last_time = possible_solution.get_street_overflows()
+        if overflow_sum == 0:
+            break  # Repaired successfully
+
+        # Sort clusters by size (largest first)
+        clusters = sorted(possible_solution.cluster_mapper.clusters, key=lambda c: c.size, reverse=True)
+
+        for cluster in clusters:
+            # Try delaying this cluster's start time slightly
+            cluster.start_time += random.randrange(0, 200)
+
+        attempt += 1
 
     return possible_solution

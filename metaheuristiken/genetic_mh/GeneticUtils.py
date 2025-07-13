@@ -66,8 +66,9 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.5, reclusteri
     # ---------
     # Mutation 2: Cluster Start Times
     for cluster in new_possible_solution.cluster_mapper.clusters:
-        cluster.start_time += random.randrange(-100, 100) * 10 # todo set step size variable
-        cluster.start_time = math.floor(max(0, cluster.start_time)) # floor just to have nice starting times
+        if random.random() < 0.25: # todo check if all these probs should go in conf, i think not
+            new_starting_time = cluster.start_time + random.randrange(-5000, 5000) # todo set step size variable
+            cluster.start_time = math.floor(max(0, new_starting_time)) # floor just to have nice starting times
 
     # ---------
     # Mutation 3: Route PR Goals
@@ -104,34 +105,41 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.5, reclusteri
 
 def create_new_possible_solution(pr_list, ra_list, edges_list, max_street_capacity, num_clusters):
     """
-    Generates a completley new random solution.
-    Can be used at init and for exploration.
+    Optimized version of generating a random solution.
+    Each RA is assigned to a PR once, and then replicated by population.
     """
     possible_solution = PossibleSolution(
-        max_street_capacity = max_street_capacity,
-        pr_list = pr_list,
-        ra_list =  ra_list,
-        edges_list = edges_list,
-        num_clusters = num_clusters,
+        max_street_capacity=max_street_capacity,
+        pr_list=pr_list,
+        ra_list=ra_list,
+        edges_list=edges_list,
+        num_clusters=num_clusters,
         birth_type="new_random"
     )
 
-    pr_ids = [por["id"] for por in pr_list]
+    # Precompute PR IDs and edge lookup dictionary
+    pr_ids = [pr["id"] for pr in pr_list]
+    edge_dict = {(edge["from"], edge["to"]): float(edge["distance_km"]) * 1000 for edge in edges_list}
+
     rescue_routes = []
 
     for ra in ra_list:
-        ra_cluster = possible_solution.cluster_mapper.find_RA_cluster(ra["id"])
-        for human in range(0, ra["population"]):    
-            target_pr_id = random.choice(pr_ids)
-            distance = next(float(edge["distance_km"]) for edge in edges_list if edge["from"] == ra["id"] and edge["to"] == target_pr_id) * 1000
-            rescue_routes.append(
-                Route(
-                    ra_id = ra["id"],
-                    pr_id = target_pr_id,
-                    distance = distance,
-                    cluster = ra_cluster
-                )
-            )
+        ra_id = ra["id"]
+        ra_cluster = possible_solution.cluster_mapper.find_RA_cluster(ra_id)
+
+        # Select one random PR for this RA
+        target_pr_id = random.choice(pr_ids)
+        distance = edge_dict.get((ra_id, target_pr_id))  # Use 0 or raise if missing
+
+        # Create one route per person (or optimize further if not needed)
+        rescue_routes.extend([
+            Route(
+                ra_id=ra_id,
+                pr_id=target_pr_id,
+                distance=distance,
+                cluster=ra_cluster
+            ) for _ in range(ra["population"])
+        ])
 
     possible_solution.routes = rescue_routes
     return possible_solution

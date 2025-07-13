@@ -82,35 +82,41 @@ class GeneticMetaheuristik(Metaheuristik):
         
         # TODO maybe put the percentages also in the conf
         num_childs = self.konfiguration["population_size"]
-        num_crossovers =  math.floor(num_childs * 0.25)
+        num_crossovers =  math.floor(num_childs * 0.2)
         num_explorative_mutants = math.floor(num_childs * 0.5)
-        num_new_random_solutions = math.floor(num_childs * 0.05)
+        #num_new_random_solutions = math.floor(num_childs * 0)
         num_elits = math.floor(num_childs * 0.1)
-        num_repairs= math.floor(num_childs * 0.1)
+        num_repairs= math.floor(num_childs * 0.2)
 
+        # ----
         # CROSSOVERS
         for i in range(num_crossovers):
             parent1, parent2 = GeneticUtils.select_two_by_roulette(latest_generation)
             child = GeneticUtils.mutation_crossover(parent1, parent2, self.pr_list)
             new_generation.append(child)
 
+        # ----
         # EXPLORATIVE MUTANTS
         for i in range(num_explorative_mutants):
             parent1, _ = GeneticUtils.select_two_by_roulette(latest_generation)
             child = GeneticUtils.apply_mutation(parent1, self.pr_list)
             new_generation.append(child)
 
+        # Removed this one due to performance and not really bringing benefits
+        # ----
         # RANDOM NEW SOLUTIONS
-        for i in range(num_new_random_solutions):
-            child = GeneticUtils.create_new_possible_solution(self.pr_list, self.ra_list, self.edges_list, self.max_street_capacity, self.konfiguration["num_clusters"])
-            new_generation.append(child)
+        #for i in range(num_new_random_solutions):
+        #    child = GeneticUtils.create_new_possible_solution(self.pr_list, self.ra_list, self.edges_list, self.max_street_capacity, self.konfiguration["num_clusters"])
+        #    new_generation.append(child)
 
+        # ----
         # ELITS
         elits = sorted(latest_generation, key=lambda p: p.loss)[:num_elits]
         for elit in elits:
             elit.birth_type = "elit"
         new_generation += elits
 
+        # ----
         # REPAIRS -> get the best solutions and repair them (no PR overflows ) # TODO also fix Street capacity here
         repair_candidates = sorted(latest_generation, key=lambda p: p.loss)[:num_repairs]
         for repair_candidate in repair_candidates:
