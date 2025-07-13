@@ -8,6 +8,7 @@ import math
 from copy import deepcopy
 import time
 import os
+import numpy as np
 
 class GeneticMetaheuristik(Metaheuristik):
     def __init__(self, instanz_daten, konfiguration, durchlauf_verzeichnis):
@@ -23,10 +24,36 @@ class GeneticMetaheuristik(Metaheuristik):
         
     def initialisiere(self):
         # read graph data and set some general variable
-
         self.ra_list = self.eingabe_daten["residential_areas"]
         self.pr_list = self.eingabe_daten["places_of_refuge"]
         self.edges_list = self.eingabe_daten["edges"]
+
+        # Analyze the input data a little bit
+        print("-------------------")
+        print("Input Data Overview")
+        print(f"Number of RAs {len(self.ra_list)}")
+        print(f"Number of PRs {len(self.pr_list)}")
+        ra_pop_array = [ra["population"] for ra in self.ra_list]
+        print(f"City Population: total={sum(ra_pop_array)}, max RA={max(ra_pop_array)}, mean RA={np.mean(ra_pop_array)}, min RA={min(ra_pop_array)}")
+        del ra_pop_array
+        pr_capacity_array = [pr["capacity"] for pr in self.pr_list]
+        print(f"City RAs capacity: total={sum(pr_capacity_array)}, max RA={max(pr_capacity_array)}, mean RA={np.mean(pr_capacity_array)}, min RA={min(pr_capacity_array)}")
+        del pr_capacity_array
+        print("-------------------")
+
+        # group people for more efficient computing, the heigher the group the less optimal the solution though
+        route_counter = 0 
+        for ra in self.ra_list:
+            simplified_population_size = math.floor(ra["population"] / self.konfiguration["route_group_size"])
+            ra["population"] = simplified_population_size
+            route_counter += simplified_population_size
+
+        for pr in self.pr_list:
+            pr["capacity"] = math.floor(pr["capacity"] / self.konfiguration["route_group_size"])
+
+        
+        print(f"Routes to calculate: {route_counter}")
+        print("-------------------")
 
         city_population = sum([ra["population"] for ra in self.ra_list])
         self.max_street_capacity = math.ceil(self.konfiguration["street_capacity"] * city_population)
@@ -35,10 +62,13 @@ class GeneticMetaheuristik(Metaheuristik):
         assert city_population / self.konfiguration["num_clusters"] < self.max_street_capacity, "You need more clusters to stay under the street_overflow bound"
 
         first_generation = Generation()
+
+        print("Generating Initial Start Population..")
         for i in range(self.konfiguration["population_size"]): #"population_size" as in: population of solutions, not city_population
             possible_solution = GeneticUtils.create_new_possible_solution(self.pr_list, self.ra_list, self.edges_list, self.max_street_capacity, self.konfiguration["num_clusters"])
+            print(f"done with init population {i}/{self.konfiguration['population_size']}")
             first_generation.append(possible_solution)
-            
+
         first_generation.set_losses()
         self.generations.append(first_generation)
 
@@ -89,6 +119,7 @@ class GeneticMetaheuristik(Metaheuristik):
             new_generation.append(repaired)
 
         # Set losses
+        print("Calculating Losses")
         new_generation.set_losses()
 
         self.generations.append(new_generation)

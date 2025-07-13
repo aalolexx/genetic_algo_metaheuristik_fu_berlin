@@ -3,11 +3,11 @@ class Generation(list):
         super().__init__(*args)
 
     def set_losses(self):
-        #i = 0
+        i = 0
         for ind in self:
             ind.set_loss()
-            #print(f"calculated ind loss ({i}/{len(self)})")
-            #i += 1
+            print(f"calculated ind loss ({i}/{len(self)})")
+            i += 1
 
     def get_best(self):
         return min(self, key=lambda ind: ind.loss)

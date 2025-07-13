@@ -120,8 +120,8 @@ def create_new_possible_solution(pr_list, ra_list, edges_list, max_street_capaci
     rescue_routes = []
 
     for ra in ra_list:
-        for human in range(0, ra["population"]):
-            ra_cluster = possible_solution.cluster_mapper.find_RA_cluster(ra["id"])
+        ra_cluster = possible_solution.cluster_mapper.find_RA_cluster(ra["id"])
+        for human in range(0, ra["population"]):    
             target_pr_id = random.choice(pr_ids)
             distance = next(float(edge["distance_km"]) for edge in edges_list if edge["from"] == ra["id"] and edge["to"] == target_pr_id) * 1000
             rescue_routes.append(
