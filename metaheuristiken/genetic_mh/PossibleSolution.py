@@ -31,8 +31,8 @@ class PossibleSolution:
 
 
     def set_loss(self):
-        street_cap_loss, pr_overflow_loss, time_loss, cluster_std_loss = self.get_loss_dict()
-        self.loss = street_cap_loss + pr_overflow_loss + time_loss + cluster_std_loss
+        street_cap_loss, pr_overflow_loss, time_loss = self.get_loss_dict()
+        self.loss = street_cap_loss + pr_overflow_loss + time_loss
         #print(f"LOSS: {street_overflow_sum / self.max_street_capacity}, {sum_pr_overflows}, {normalized_time} ")
 
     
@@ -45,14 +45,11 @@ class PossibleSolution:
         sum_pr_overflows = self.get_sum_pr_overflows()
         normalized_pr_overflow = sum_pr_overflows / population_size
 
-        cluster_std_loss = np.std([cluster.size for cluster in self.cluster_mapper.clusters]) / np.mean([cluster.size for cluster in self.cluster_mapper.clusters])
-
         weighted_time = normalized_time
-        weighted_street_overflow = normalized_street_overflow * 20 + 2
-        weighted_pr_overflow = normalized_pr_overflow * 10 * 2
-        weidghted_cluster_loss = cluster_std_loss  * 5
+        weighted_street_overflow = normalized_street_overflow * 15
+        weighted_pr_overflow = normalized_pr_overflow * 15
 
-        return weighted_street_overflow, weighted_pr_overflow, weighted_time, weidghted_cluster_loss
+        return weighted_street_overflow, weighted_pr_overflow, weighted_time
 
     #
     # Analysis Functions
@@ -90,8 +87,7 @@ class PossibleSolution:
             last_event_time = time
     
         # Normalize last_event_time
-        normalized_time = last_event_time / longest_distance - 1 # 0 would be the optimal solution (unrealistic to reach due to max street cap)
-
+        normalized_time = last_event_time / longest_distance -1 # 0 would be the optimal solution
         #print(f"STREET OVERFLOW: {amount_street_overflows}, {street_overflow_sum}, {normalized_time}, {last_event_time}")
 
         return amount_street_overflows, street_overflow_sum, normalized_time, last_event_time

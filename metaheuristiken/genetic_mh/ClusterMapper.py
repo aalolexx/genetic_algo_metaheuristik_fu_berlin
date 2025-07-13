@@ -35,7 +35,7 @@ class ClusterMapper():
         result = []
         for i, ra_group in enumerate(clusters):
             new_cluster = Cluster(
-                start_time=max_start_time,
+                start_time=0, # TODO check whats betterrandom.randrange(0, int(max_start_time)),-> atm it looks starting at 0 gives the best results
                 cluster_mapper=self,
                 ra_ids=[ra["id"] for ra in ra_group],
                 size=sum(ra["population"] for ra in ra_group)

@@ -3,6 +3,7 @@ from copy import deepcopy
 from metaheuristiken.genetic_mh.PossibleSolution import PossibleSolution
 from metaheuristiken.genetic_mh.Route import Route
 import numpy as np
+import math
 
 def select_two_by_roulette(population):
     """
@@ -52,10 +53,10 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.5, reclusteri
     new_possible_solution.birth_type = "mutation"
 
     # ---------
-    # Mutation 1: Reorer the cluster distribution
+    # Mutation 1: Reorder the cluster distribution
     if random.random() > reclustering_rate: 
         k = random.random()
-        if k < 0.2:
+        if k < 0.4:
             new_possible_solution.cluster_mapper.recluster_population()
         else:
             for ra in new_possible_solution.ra_list:
@@ -66,7 +67,7 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.5, reclusteri
     # Mutation 2: Cluster Start Times
     for cluster in new_possible_solution.cluster_mapper.clusters:
         cluster.start_time += random.randrange(-100, 100) * 10 # todo set step size variable
-        cluster.start_time = max(0, cluster.start_time)
+        cluster.start_time = math.floor(max(0, cluster.start_time)) # floor just to have nice starting times
 
     # ---------
     # Mutation 3: Route PR Goals
@@ -122,7 +123,7 @@ def create_new_possible_solution(pr_list, ra_list, edges_list, max_street_capaci
         for human in range(0, ra["population"]):
             ra_cluster = possible_solution.cluster_mapper.find_RA_cluster(ra["id"])
             target_pr_id = random.choice(pr_ids)
-            distance = [int(edge["distance_km"]) for edge in edges_list if edge["from"]==ra["id"] and edge["to"]==target_pr_id][0] * 1000
+            distance = next(float(edge["distance_km"]) for edge in edges_list if edge["from"] == ra["id"] and edge["to"] == target_pr_id) * 1000
             rescue_routes.append(
                 Route(
                     ra_id = ra["id"],

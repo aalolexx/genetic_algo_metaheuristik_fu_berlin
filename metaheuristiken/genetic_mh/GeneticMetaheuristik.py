@@ -3,7 +3,9 @@ import random
 from metaheuristiken.genetic_mh.Route import Route
 from metaheuristiken.genetic_mh.Generation import Generation
 from metaheuristiken.genetic_mh import GeneticUtils
+from metaheuristiken.genetic_mh import RepairUtils
 import math
+from copy import deepcopy
 import time
 import os
 
@@ -47,12 +49,14 @@ class GeneticMetaheuristik(Metaheuristik):
         """
         latest_generation = self.generations[-1]
         new_generation = Generation()
-
+        
+        # TODO maybe put the percentages also in the conf
         num_childs = self.konfiguration["population_size"]
         num_crossovers =  math.floor(num_childs * 0.25)
         num_explorative_mutants = math.floor(num_childs * 0.5)
         num_new_random_solutions = math.floor(num_childs * 0.05)
-        num_elits = math.floor(num_childs * 0.2)
+        num_elits = math.floor(num_childs * 0.1)
+        num_repairs= math.floor(num_childs * 0.1)
 
         # CROSSOVERS
         for i in range(num_crossovers):
@@ -77,8 +81,16 @@ class GeneticMetaheuristik(Metaheuristik):
             elit.birth_type = "elit"
         new_generation += elits
 
+        # REPAIRS -> get the best solutions and repair them (no PR overflows ) # TODO also fix Street capacity here
+        repair_candidates = sorted(latest_generation, key=lambda p: p.loss)[:num_repairs]
+        for repair_candidate in repair_candidates:
+            repaired = RepairUtils.repair_possible_solution(deepcopy(repair_candidate))
+            repaired.birth_type = "repaired"
+            new_generation.append(repaired)
+
         # Set losses
         new_generation.set_losses()
+
         self.generations.append(new_generation)
 
         # clean old generations to save storage

@@ -53,11 +53,30 @@ def main():
     )
 
     # todo remove the follinwg, just for local testing
+    patience = mh[0].konfiguration["patience"]
+    no_improvement_counter = 0
+    max_iterations = mh[0].konfiguration["max_iterationen"]
+    best_loss = float("inf")
+
     mh[0].initialisiere()
-    for i in range(100):
-        print(f"ITERATION {i}/100")
+    for i in range(max_iterations):
+        print(f"ITERATION {i}/{max_iterations}")
         mh[0].iteriere()
         mh[0].speichere_zwischenergebnis()
+
+        if mh[0].bewerte_loesung().loss == 0:
+            print("REACHED OPTIMAL SOLUTION")
+            break
+
+        if mh[0].bewerte_loesung().loss < best_loss:
+            no_improvement_counter = 0
+            best_loss = mh[0].bewerte_loesung().loss 
+        else:
+            no_improvement_counter += 1
+        
+        if no_improvement_counter > patience:
+            print("STOPPING DUE TO NO IMPROVEMENT")
+            break
     
     best_solution = mh[0].bewerte_loesung()
     plot_losses(DURCHLAUF_VERZEICHNIS)
@@ -66,6 +85,7 @@ def main():
     plot_people_on_street(DURCHLAUF_VERZEICHNIS, best_solution.routes, mh[0].max_street_capacity)
     plot_pr_usage_vs_capacity(DURCHLAUF_VERZEICHNIS, best_solution.routes, mh[0].pr_list)
     plot_generation_birthtype_loss(DURCHLAUF_VERZEICHNIS)
+    plot_generation_birthtype_loss(DURCHLAUF_VERZEICHNIS, top_y=2)
 
 if __name__ == "__main__":
     main()
