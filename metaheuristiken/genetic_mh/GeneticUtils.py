@@ -78,11 +78,18 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.5, reclusteri
     for ra in set(route.RA for route in new_possible_solution.routes):
         available_edges = [edge for edge in new_possible_solution.edges_list if edge["from"] == ra]
 
-        weights_distance = np.array([1 / float(edge["distance_km"]) for edge in available_edges])
-        normalized_weights_distance = (weights_distance - np.min(weights_distance)) / (np.max(weights_distance) - np.min(weights_distance))
+        # Compute weights
+        weights_distance = np.array([
+            1 / float(edge["distance_km"]) for edge in available_edges
+        ])
+        weights_capacity = np.array([
+            next(pr for pr in all_prs if pr["id"] == edge["to"])["capacity"]
+            for edge in available_edges
+        ])
 
-        weights_capacity = np.array([next(pr for pr in all_prs if pr["id"] == edge["to"])["capacity"] for edge in available_edges])
-        normalized_weights_capacity = (weights_capacity - np.min(weights_capacity)) / (np.max(weights_capacity) - np.min(weights_capacity))
+        # Normalize safely
+        normalized_weights_distance = safe_min_max_normalize(weights_distance)
+        normalized_weights_capacity = safe_min_max_normalize(weights_capacity)
 
         ra_edge_selection_weights[ra] = {
             "edges": available_edges,
@@ -95,7 +102,7 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.5, reclusteri
         if random.random() < route_change_rate:
             data = ra_edge_selection_weights[route.RA]
             edges = data["edges"]
-            weights = 0.2 * data["distance_weights"] + 4 * data["capacity_weights"]
+            weights = 0.5 * data["distance_weights"] + 4 * data["capacity_weights"]
 
             # Sample new edge based on combined weights
             route.PR = random.choices(edges, weights=weights, k=1)[0]["to"]
@@ -143,3 +150,11 @@ def create_new_possible_solution(pr_list, ra_list, edges_list, max_street_capaci
 
     possible_solution.routes = rescue_routes
     return possible_solution
+
+
+def safe_min_max_normalize(arr):
+    min_val = np.min(arr)
+    max_val = np.max(arr)
+    if max_val == min_val:
+        return np.ones_like(arr, dtype=float)
+    return (arr - min_val) / (max_val - min_val)

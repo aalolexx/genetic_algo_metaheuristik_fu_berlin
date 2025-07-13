@@ -90,6 +90,7 @@ class GeneticMetaheuristik(Metaheuristik):
 
         # ----
         # CROSSOVERS
+        print("- Generating Crossovers")
         for i in range(num_crossovers):
             parent1, parent2 = GeneticUtils.select_two_by_roulette(latest_generation)
             child = GeneticUtils.mutation_crossover(parent1, parent2, self.pr_list)
@@ -97,6 +98,7 @@ class GeneticMetaheuristik(Metaheuristik):
 
         # ----
         # EXPLORATIVE MUTANTS
+        print("- Explorative Mutants")
         for i in range(num_explorative_mutants):
             parent1, _ = GeneticUtils.select_two_by_roulette(latest_generation)
             child = GeneticUtils.apply_mutation(parent1, self.pr_list)
@@ -111,6 +113,7 @@ class GeneticMetaheuristik(Metaheuristik):
 
         # ----
         # ELITS
+        print("- Getting Elits")
         elits = sorted(latest_generation, key=lambda p: p.loss)[:num_elits]
         for elit in elits:
             elit.birth_type = "elit"
@@ -118,6 +121,7 @@ class GeneticMetaheuristik(Metaheuristik):
 
         # ----
         # REPAIRS -> get the best solutions and repair them (no PR overflows ) # TODO also fix Street capacity here
+        print("- Generating Repairs")
         repair_candidates = sorted(latest_generation, key=lambda p: p.loss)[:num_repairs]
         for repair_candidate in repair_candidates:
             repaired = RepairUtils.repair_possible_solution(deepcopy(repair_candidate))
