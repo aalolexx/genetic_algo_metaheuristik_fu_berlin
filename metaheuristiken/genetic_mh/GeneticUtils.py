@@ -4,6 +4,7 @@ from metaheuristiken.genetic_mh.PossibleSolution import PossibleSolution
 from metaheuristiken.genetic_mh.Route import Route
 import numpy as np
 import math
+from collections import defaultdict
 
 def select_two_by_roulette(population):
     """
@@ -74,20 +75,26 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.5, reclusteri
     # Mutation 3: Route PR Goals
 
     # precompute selection weights
+    # Pre-index PRs for O(1) lookup
+    pr_dict = {pr["id"]: pr for pr in all_prs}
+
+    # Pre-group edges by RA
+    edges_by_ra = defaultdict(list)
+    for edge in new_possible_solution.edges_list:
+        edges_by_ra[edge["from"]].append(edge)
+
+    # Precompute selection weights
     ra_edge_selection_weights = {}
     for ra in set(route.RA for route in new_possible_solution.routes):
-        available_edges = [edge for edge in new_possible_solution.edges_list if edge["from"] == ra]
+        available_edges = edges_by_ra[ra]
 
-        # Compute weights
         weights_distance = np.array([
-            1 / float(edge["distance_km"]) for edge in available_edges
+            1 / max(0.001, float(edge["distance_km"])) for edge in available_edges
         ])
         weights_capacity = np.array([
-            next(pr for pr in all_prs if pr["id"] == edge["to"])["capacity"]
-            for edge in available_edges
+            pr_dict[edge["to"]]["capacity"] for edge in available_edges
         ])
 
-        # Normalize safely
         normalized_weights_distance = safe_min_max_normalize(weights_distance)
         normalized_weights_capacity = safe_min_max_normalize(weights_capacity)
 
