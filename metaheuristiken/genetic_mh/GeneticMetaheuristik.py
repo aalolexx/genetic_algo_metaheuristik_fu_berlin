@@ -14,6 +14,9 @@ class GeneticMetaheuristik(Metaheuristik):
     def __init__(self, instanz_daten, konfiguration, durchlauf_verzeichnis):
         super().__init__(instanz_daten, konfiguration, durchlauf_verzeichnis)
 
+        self.edges_list = None
+        self.pr_list = None
+        self.ra_list = None
         os.makedirs(durchlauf_verzeichnis, exist_ok=True)
 
         self.max_street_capacity = None # make public
@@ -39,20 +42,8 @@ class GeneticMetaheuristik(Metaheuristik):
         pr_capacity_array = [pr["capacity"] for pr in self.pr_list]
         print(f"City RAs capacity: total={sum(pr_capacity_array)}, max RA={max(pr_capacity_array)}, mean RA={np.mean(pr_capacity_array)}, min RA={min(pr_capacity_array)}")
         del pr_capacity_array
-        print("-------------------")
 
-        # group people for more efficient computing, the heigher the group the less optimal the solution though
-        route_counter = 0 
-        for ra in self.ra_list:
-            simplified_population_size = math.floor(ra["population"] / self.konfiguration["route_group_size"])
-            ra["population"] = simplified_population_size
-            route_counter += simplified_population_size
-
-        for pr in self.pr_list:
-            pr["capacity"] = math.floor(pr["capacity"] / self.konfiguration["route_group_size"])
-
-        
-        print(f"Routes to calculate: {route_counter}")
+        print(f"Routes to calculate: {len(self.ra_list)}")
         print("-------------------")
 
         city_population = sum([ra["population"] for ra in self.ra_list])

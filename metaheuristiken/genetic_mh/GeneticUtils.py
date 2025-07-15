@@ -62,7 +62,7 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.5, reclusteri
         else:
             for ra in new_possible_solution.ra_list:
                 if random.random() < 0.3: # todo maybe configurable but its neglectable
-                    new_possible_solution.cluster_mapper.random_switch_ra(ra["id"])
+                    new_possible_solution.cluster_mapper.reassign_random_ra(ra["id"])
 
     # ---------
     # Mutation 2: Cluster Start Times

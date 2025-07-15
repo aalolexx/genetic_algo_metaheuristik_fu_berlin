@@ -45,7 +45,7 @@ class ClusterMapper():
         return result
     
 
-    def random_switch_ra(self, ra_id):
+    def reassign_random_ra(self, ra_id):
         """
         Finds the cluster with a given RA ID and adds it to another random cluster
         """

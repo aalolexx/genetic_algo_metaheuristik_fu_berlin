@@ -6,7 +6,7 @@ class Generation(list):
         i = 0
         for ind in self:
             ind.set_loss()
-            print(f"calculated ind loss ({i}/{len(self)})")
+            #print(f"calculated ind loss ({i}/{len(self)})")
             i += 1
 
     def get_best(self):
