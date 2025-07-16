@@ -136,9 +136,7 @@ class GeneticMetaheuristik(Metaheuristik):
 
 
     def bewerte_loesung(self):
-        best_solution = self.generations[-1].get_best()
-        # TODO format the best solution into the given "flows" format
-        return best_solution
+        return self.generations[-1].get_best().loss
 
 
     def speichere_zwischenergebnis(self):
@@ -173,5 +171,5 @@ class GeneticMetaheuristik(Metaheuristik):
     def gebe_endloesung_aus(self):
         best_solution = self.generations[-1].get_best()
 
-        return best_solution.convert_to_desired_format(number_of_iterations=len(self.generations)) , self.bewerte_loesung().loss
+        return best_solution.convert_to_desired_format(number_of_iterations=len(self.generations)) , self.bewerte_loesung()
 
