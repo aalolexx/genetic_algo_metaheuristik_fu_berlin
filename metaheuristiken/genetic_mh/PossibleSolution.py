@@ -177,7 +177,7 @@ class PossibleSolution:
 
             clusters.append({
                 "id": i,
-                "start_sec": round((c.start_time/1000)/4*60), # converto to min (s = 4km/h)
+                "start_sec": self.convert_to_time(c.start_time),
                 "RAs": c.ra_ids,
             })
             i+=1
@@ -185,7 +185,7 @@ class PossibleSolution:
         return {
             "ZFW": "???",
             "num_iterations": number_of_iterations,
-            "total_runtime": max([(r.cluster.start_time + r.distance) for r in self.routes]),
+            "total_runtime": self.convert_to_time(max([(r.cluster.start_time + r.distance) for r in self.routes])),
             "metaheuristik": "GeneticMetaheuristic",
             "flows": flows,
             "clusters": clusters
@@ -196,3 +196,7 @@ class PossibleSolution:
         os.makedirs(os.path.dirname(export_path), exist_ok=True)
         with open(export_path, "w") as f:
             json.dump(self.convert_to_desired_format(), f, indent=2)
+
+    # converto to min (s = 4km/h)
+    def convert_to_time(self, value):
+        return round((value/1000)/4*60)
