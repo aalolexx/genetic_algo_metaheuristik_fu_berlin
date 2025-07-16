@@ -41,7 +41,7 @@ def main():
         konfigurations_daten = lade_konfiguration_aus_json(file_content)
         config_hash = md5(file_content.encode('utf-8')).hexdigest()
 
-    DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'genetic_mh_xample_instanz_{config_hash}_{time.time()}')
+    DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'geneticMetaheuristic_INSTANZ_{config_hash}')
 
     mh = []
     mh.append(
@@ -82,18 +82,17 @@ def main():
 
     print(beste_loesung)
     print(bester_wert)
-    #TODO remove files best_losses.csv, average_losses.csv, best_solution_loss.csv, detailed_generation_loss.csv from being generated
 
 
-    # best_solution = mh[0].bewerte_loesung()
-    # best_solution.export_as_json(DURCHLAUF_VERZEICHNIS)
-    # plot_losses(DURCHLAUF_VERZEICHNIS)
-    # plot_loss_dict(DURCHLAUF_VERZEICHNIS)
-    # plot_routes_timeline(DURCHLAUF_VERZEICHNIS, best_solution.routes)
-    # plot_people_on_street(DURCHLAUF_VERZEICHNIS, best_solution.routes, mh[0].max_street_capacity)
-    # plot_pr_usage_vs_capacity(DURCHLAUF_VERZEICHNIS, best_solution.routes, mh[0].pr_list)
-    # plot_generation_birthtype_loss(DURCHLAUF_VERZEICHNIS)
-    # plot_generation_birthtype_loss(DURCHLAUF_VERZEICHNIS, top_y=2)
+    best_solution = mh[0].generations[-1].get_best()
+    best_solution.export_as_json(DURCHLAUF_VERZEICHNIS)
+    plot_losses(DURCHLAUF_VERZEICHNIS)
+    plot_loss_dict(DURCHLAUF_VERZEICHNIS)
+    plot_routes_timeline(DURCHLAUF_VERZEICHNIS, best_solution.routes)
+    plot_people_on_street(DURCHLAUF_VERZEICHNIS, best_solution.routes, mh[0].max_street_capacity)
+    plot_pr_usage_vs_capacity(DURCHLAUF_VERZEICHNIS, best_solution.routes, mh[0].pr_list)
+    #plot_generation_birthtype_loss(DURCHLAUF_VERZEICHNIS)
+    #plot_generation_birthtype_loss(DURCHLAUF_VERZEICHNIS, top_y=2)
 
 if __name__ == "__main__":
     main()
