@@ -128,9 +128,11 @@ Evaluation:
 _bewerte_loesung()_ returns the loss value for the best solution of that iteration. The loss function in this 
 implementation is a combination of weighted street overflow, RP overflow and time of the evacuation.
 
-Final Output:  
+Saving interim results:
 _speichere_zwischenergebnis()_ returns the best evolved solution in the required output format given in [.../example_mh_beispiel/evacuation_result.json](./data/output/example_mh_beispiel/evacuation_result.json).
 
+Final output: 
+_gebe_endloesung_aus()_ returns the best solution and its loss value.
 
 It builds on a base Metaheuristik class and uses utilities for solution creation, mutation, crossover, and repair.
 
