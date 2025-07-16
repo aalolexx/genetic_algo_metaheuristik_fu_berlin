@@ -58,8 +58,14 @@ def main():
     max_iterations = mh[0].konfiguration["max_iterationen"]
     best_loss = float("inf")
 
+    start = time.time()
     mh[0].initialisiere()
     for i in range(max_iterations):
+        end = time.time()
+        if end - start > mh[0].konfiguration["max_laufzeit"]:
+            print("Maximum runtime was reached!")
+            break
+
         print(f"ITERATION {i}/{max_iterations}")
         mh[0].iteriere()
         mh[0].speichere_zwischenergebnis()
