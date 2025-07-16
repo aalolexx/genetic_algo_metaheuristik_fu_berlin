@@ -188,7 +188,13 @@ class PossibleSolution:
             "ZFW": "???",
             "num_iterations": number_of_iterations,
             "total_runtime": max([(r.cluster.start_time + r.distance) for r in self.routes]),
-            "metaheuristik": "GeneticMetaheuristiken",
+            "metaheuristik": "GeneticMetaheuristic",
             "flows": flows,
             "clusters": clusters
         }
+
+    def write_solution_to_file(self, directory, iteration):
+        export_path = os.path.join(directory, f"evacuation_result_iteration_{iteration}.json")
+        os.makedirs(os.path.dirname(export_path), exist_ok=True)
+        with open(export_path, "w") as f:
+            json.dump(self.convert_to_desired_format(), f, indent=2)

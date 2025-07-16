@@ -23,6 +23,7 @@ class GeneticMetaheuristik(Metaheuristik):
 
         # Genetic Algorithm specific properties
         self.generations = []
+        self.iteration_counter = 0
 
         
     def initialisiere(self):
@@ -61,7 +62,11 @@ class GeneticMetaheuristik(Metaheuristik):
             first_generation.append(possible_solution)
 
         first_generation.set_losses()
+
+        first_generation.get_best().write_solution_to_file(self.durchlauf_verzeichnis, 1)
+
         self.generations.append(first_generation)
+        self.iteration_counter = 1
 
 
     def iteriere(self):
@@ -124,6 +129,7 @@ class GeneticMetaheuristik(Metaheuristik):
         new_generation.set_losses()
 
         self.generations.append(new_generation)
+        self.iteration_counter += 1
 
         # clean old generations to save storage
         if len(self.generations) > 3:
@@ -162,7 +168,11 @@ class GeneticMetaheuristik(Metaheuristik):
 
         print(f"Logged average: {avg_loss}, best: {best_solution.loss}")
 
+        # save in ouput directory
+        best_solution.write_solution_to_file(self.durchlauf_verzeichnis, self.iteration_counter)
+
     def gebe_endloesung_aus(self):
         best_solution = self.generations[-1].get_best()
 
         return best_solution.convert_to_desired_format(number_of_iterations=len(self.generations)) , self.bewerte_loesung().loss
+
