@@ -1,5 +1,4 @@
 from metaheuristiken.genetic_mh.Route import Route
-from metaheuristiken.genetic_mh.GlobalTracker import GlobalTracker
 from metaheuristiken.genetic_mh.ClusterMapper import ClusterMapper
 from copy import deepcopy
 import numpy as np
