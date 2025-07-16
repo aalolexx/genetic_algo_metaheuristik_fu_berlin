@@ -32,7 +32,7 @@ def lade_daten_aus_json(dateipfad):
 
 #%%
 def main():
-    eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "middle_evacuation_data.json"))
+    eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "small_evacuation_data.json"))
 
     CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'genetic_mh_config.json')
 
@@ -64,13 +64,13 @@ def main():
         mh[0].iteriere()
         mh[0].speichere_zwischenergebnis()
 
-        if mh[0].bewerte_loesung().loss == 0:
+        if mh[0].bewerte_loesung() == 0:
             print("REACHED OPTIMAL SOLUTION")
             break
 
-        if mh[0].bewerte_loesung().loss < best_loss:
+        if mh[0].bewerte_loesung() < best_loss:
             no_improvement_counter = 0
-            best_loss = mh[0].bewerte_loesung().loss 
+            best_loss = mh[0].bewerte_loesung()
         else:
             no_improvement_counter += 1
         
