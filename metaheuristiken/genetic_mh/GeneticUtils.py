@@ -117,7 +117,7 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.5, reclusteri
     return new_possible_solution
      
 
-def create_new_possible_solution(pr_list, ra_list, edges_list, max_street_capacity, num_clusters):
+def create_new_possible_solution(pr_list, ra_list, edges_list, max_street_capacity, num_clusters, route_group_size=1):
     """
     Optimized version of generating a random solution.
     Each RA is assigned to a PR once, and then replicated by population.
@@ -145,14 +145,22 @@ def create_new_possible_solution(pr_list, ra_list, edges_list, max_street_capaci
         target_pr_id = random.choice(pr_ids)
         distance = edge_dict.get((ra_id, target_pr_id))  # Use 0 or raise if missing
 
-        # Create one route per person (or optimize further if not needed)
+        # Create the routes for all groups
+        full_groups = ra["population"] // route_group_size
+        remainder = ra["population"] % route_group_size
+
+        computed_route_group_sizes = [route_group_size] * full_groups
+        if remainder:
+            computed_route_group_sizes.append(remainder)
+
         rescue_routes.extend([
             Route(
                 ra_id=ra_id,
                 pr_id=target_pr_id,
                 distance=distance,
-                cluster=ra_cluster
-            ) for _ in range(ra["population"])
+                cluster=ra_cluster,
+                group_size=group_size
+            ) for group_size in computed_route_group_sizes
         ])
 
     possible_solution.routes = rescue_routes

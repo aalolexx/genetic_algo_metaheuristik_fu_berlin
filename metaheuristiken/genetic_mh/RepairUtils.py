@@ -11,7 +11,7 @@ def repair_possible_solution(possible_solution):
     # Count current PR usage
     pr_usage = {pr["id"]: 0 for pr in possible_solution.pr_list}
     for route in possible_solution.routes:
-        pr_usage[route.PR] += 1
+        pr_usage[route.PR] += route.group_size
 
     # Identify overflown and underused PRs
     pr_capacity = {pr["id"]: pr["capacity"] for pr in possible_solution.pr_list}
@@ -42,9 +42,9 @@ def repair_possible_solution(possible_solution):
                 if pr_usage[pr_id] < pr_capacity[pr_id]:
                     # Reassign route
                     route.set_pr(pr_id, candidate["distance"])
-                    pr_usage[route.PR] -= 1  # remove from old
+                    pr_usage[route.PR] -= route.group_size  # remove from old
                     route.PR = pr_id
-                    pr_usage[pr_id] += 1
+                    pr_usage[pr_id] += route.group_size
                     break  # move to next route
 
 
