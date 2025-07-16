@@ -1,8 +1,8 @@
 # GeneticMetaheuristik
 
 This repository contains an implementation of a genetic algorithm used in metaheuristics. It is adapted to solve the 
-problems of finding a satisfying solution for an evacuation problem taking into account maximum street capacities 
-and maximum rescue area capacities.
+problems of finding a satisfying solution for an evacuation problem taking into account maximum street capacities, 
+maximum RP capacities and evacuation time.
 
 ## Installation
 
@@ -18,20 +18,84 @@ Install python dependencies (preferably in a local environment) with
 pip install -r requirements.txt
 ```
 
+## Basic principles
+
+### Genetic Algorithms
+
+Genetic algorithms are optimization methods inspired by natural evolution. They can solve complex problems by 
+evolving a population of possible solutions over time to find better ones. A Solution's fittness is rated by a loss 
+function and during runtime of the algorithm, those loss values will (mostly) continuously be lowered while better 
+solutions are approached. At the same time, one of the biggest advantages of genetic algorithms are randomized 
+procedures, namely crossover and mutation, to explore a wider range of solutions and to not get stuck in local minima. 
+
+Futher explanation of genetic algorithms can be found in [S. Ólafsson (2006)](https://www.sciencedirect.com/science/article/abs/pii/S0927050706130212?via%3Dihub) 
+
+### Crossover Mechanism
+
+The crossover operation is responsible for combining two parent solutions to generate a new child solution. A random 
+crossover point is selected, and the goal RPs (RP) from both parents are combined — the first segment  
+coming from parent 1 and the second from parent 2.
+
+Only the RP assignments are mixed; the rest of the route structure remains unchanged. This strategy ensures 
+that the 
+overall evacuation timing (tied to the clusters) stays valid while exploring new combinations of assignments.
+
+Additionally, there's a chance of applying a mutation to the child after crossover, slightly altering its RP 
+assignments to introduce diversity.
+
+### Mutation Mechanism
+
+Mutation introduces diversity into a possible solution by applying small, randomized changes. It creates a mutated 
+copy of the input solution to preserve the original.
+
+Three kinds of mutation are applied:
+
+Cluster Reordering:  
+With a certain probability, the assignment of RPs to clusters is modified. This is done either by 
+redistributing all RPs among existing clusters (reclustering) or by randomly reassigning individual RAs to different 
+clusters, helping to explore new clustering configurations.
+
+Cluster Start Time Adjustment:  
+Some clusters have their start time shifted slightly (by up to ±5000 seconds). This helps in fine-tuning the  
+evacuation timing to reduce street congestion and overlaps.
+
+Route Reassignment:  
+With a certain chance for each route, the target RP is changed. New RPs are selected based on a 
+weighted combination of proximity (shorter distance) and available capacity.  This ensures that more suitable RPs 
+are chosen without overloading them.
+
+By applying these three types of mutations, the function improves the exploration of the  solution space and helps 
+the algorithm escape local optima.
+
+### Repair Mechanism
+
+The repair functionality improves the feasibility of a solution by addressing two main issues: 
+overloaded RPs and street capacity overflow.
+
+First, it checks how many people are currently assigned to each RP and compares this with the RP’s capacity. 
+If a RP is overloaded, the function tries to reassign some of its routes to nearby underutilized RPs. 
+It does this by prioritizing RPs that are closer to the route’s origin (RA) to keep travel distances short.
+
+Second, the function checks for streets that are over their capacity. If such overflows exist, 
+it attempts to reduce congestion by slightly delaying the start times of larger clusters. 
+This adjustment is repeated for up to five iterations or until the overflows are resolved.
+
+
 ## Classes and modules
 
 This part will briefly summarize the used classes in this project.
 
 ### Cluster(object):
 
-The _[Cluster](./metaheuristiken/genetic_mh/Cluster.py)_ class represents a group of people who start evacuation from a specific residential area at the same 
-time and head towards a specific rescue area.
+The _[Cluster](./metaheuristiken/genetic_mh/Cluster.py)_ class represents a group of people who start evacuation 
+from a specific residential area (RA) at the same 
+time and head towards a specific rescue point (RP).
 
 ### ClusterMapper(object):
 
 The _[ClusterMapper](./metaheuristiken/genetic_mh/ClusterMapper.py)_ class is responsible for organizing a list of residential areas into a specified number of clusters.
 
-This module provides essential functionality for managing clusters of rescue areas. It supports random  
+This module provides essential functionality for managing clusters of RPs. It supports random  
 initialization, where RAs are distributed across clusters in a balanced way based on their population, promoting  
 diversity in the solution space. Individual RAs can be reassigned to different clusters, with a preference for  
 smaller clusters to maintain balance. Additionally, the module allows for complete reclustering, redistributing all 
@@ -54,18 +118,19 @@ routing and clustering solutions over multiple generations.
 
 Key features:
 
-Initialization:
-_initialisiere(self)_ enerates an initial population of possible evacuation plans based on input data (RAs, PRs, edges).
+Initialization:  
+_initialisiere(self)_ enerates an initial population of possible evacuation plans based on input data (RAs, RPs, edges).
 
-Iteration (iteriere):
+Iteration (iteriere):  
 _iteriere(self)_ creates new generations through crossovers, mutations, elite preservation, and solution repair.
 
-Evaluation:
-_bewerte_loesung(self)_ returns the loss value for the best solution of that iteration. Todo realize in code
+Evaluation:  
+_bewerte_loesung(self)_ returns the loss value for the best solution of that iteration. The loss function in this 
+implementation is a combination of weighted street overflow, RP overflow and time of the evacuation.
 
-Final Output:
+Final Output:  
 _speichere_zwischenergebnis(self)_ returns the best evolved solution in the required output format given in [.../example_mh_beispiel/evacuation_result.json](./data/output/example_mh_beispiel/evacuation_result.json).
-todo: realize in code
+
 
 It builds on a base Metaheuristik class and uses utilities for solution creation, mutation, crossover, and repair.
 
@@ -86,17 +151,20 @@ The _[PossibleSolution](./metaheuristiken/genetic_mh/PossibleSolution.py)_ class
 evacuation problem, 
 assigning rescue 
 routes from RAs to 
-PRs 
-while managing clustering, capacity, and timing. It calculates a loss based on street overload, PR overflow, and overall 
+RPs 
+while managing clustering, capacity, and timing. It calculates a loss based on street overload, RP overflow, and overall 
 duration. The class supports outputting the solution as JSON or in a custom format given in 
 [.../example_mh_beispiel/evacuation_result.json](data/output/example_mh_beispiel/evacuation_result.json).
 
 ### RepairUtils.py
 
-The _[RepairUtils](./metaheuristiken/genetic_mh/RepairUtils.py)_ module tries to improve/repair solutions by redistributing routes to underutilized PRs with 
+The _[RepairUtils](./metaheuristiken/genetic_mh/RepairUtils.py)_ module tries to improve/repair solutions by redistributing routes to underutilized RPs with 
 available capacity and randomizing starting times to counter overflown street capacities.
 
 ### Route
 
-The _[Route](./metaheuristiken/genetic_mh/Route.py)_ class symbolized an edge between residential area and rescue area. It carries information about the 
-edge's length and to which cluster the route belongs to.
+The _[Route](./metaheuristiken/genetic_mh/Route.py)_ class symbolized an edge between residential area and RP. It carries information about the 
+edge's length and to which cluster the route belongs to. The class also provides the funcionality to groupe individual 
+people into small groups. This can reduce the computation time significantly but also reduce the result quality if 
+chosen poorly, because individuals are more efficiently to manage than groups regarding street capacity and RP 
+capacity.
