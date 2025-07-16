@@ -24,6 +24,7 @@ class GeneticMetaheuristik(Metaheuristik):
         # Genetic Algorithm specific properties
         self.generations = []
         self.iteration_counter = 0
+        self.start_time = time.time()
 
         
     def initialisiere(self):
@@ -62,7 +63,7 @@ class GeneticMetaheuristik(Metaheuristik):
 
         first_generation.set_losses()
 
-        first_generation.get_best().write_solution_to_file(self.durchlauf_verzeichnis, 1)
+        first_generation.get_best().write_solution_to_file(self.durchlauf_verzeichnis, 1, self.start_time)
 
         self.generations.append(first_generation)
         self.iteration_counter = 1
@@ -166,12 +167,12 @@ class GeneticMetaheuristik(Metaheuristik):
         print(f"Logged average: {avg_loss}, best: {best_solution.loss}")
 
         # save in ouput directory
-        best_solution.write_solution_to_file(self.durchlauf_verzeichnis, self.iteration_counter)
+        best_solution.write_solution_to_file(self.durchlauf_verzeichnis, self.iteration_counter, self.start_time)
 
 
     def gebe_endloesung_aus(self):
         best_solution = self.get_best_solution()
-        return best_solution.convert_to_desired_format(len(self.generations)), self.bewerte_loesung()
+        return best_solution.convert_to_desired_format(len(self.generations), self.start_time), self.bewerte_loesung()
 
     
     def get_best_solution(self):
