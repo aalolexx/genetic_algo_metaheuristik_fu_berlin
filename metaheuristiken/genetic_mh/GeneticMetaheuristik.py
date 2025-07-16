@@ -161,3 +161,8 @@ class GeneticMetaheuristik(Metaheuristik):
             f_best.write(f"{self.generations[-1].dict_all_inds_loss()}\n")
 
         print(f"Logged average: {avg_loss}, best: {best_solution.loss}")
+
+    def gebe_endloesung_aus(self):
+        best_solution = self.generations[-1].get_best()
+
+        return best_solution.convert_to_desired_format(number_of_iterations=len(self.generations)) , self.bewerte_loesung().loss

@@ -77,7 +77,13 @@ def main():
         if no_improvement_counter > patience:
             print("STOPPING DUE TO NO IMPROVEMENT")
             break
-    
+
+    beste_loesung,bester_wert = mh[0].gebe_endloesung_aus()
+
+    print(beste_loesung)
+    print(bester_wert)
+
+
     best_solution = mh[0].bewerte_loesung()
     best_solution.export_as_json(DURCHLAUF_VERZEICHNIS)
     plot_losses(DURCHLAUF_VERZEICHNIS)

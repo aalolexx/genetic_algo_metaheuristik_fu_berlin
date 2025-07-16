@@ -153,3 +153,36 @@ class PossibleSolution:
             json.dump(export_data, f, indent=2)
 
         print(f"Possible solution exported to {export_path}")
+
+    def convert_to_desired_format(self, number_of_iterations="undefined"):
+
+        # get flows
+        flows = []
+
+        for ra in self.ra_list:
+            for pr in self.pr_list:
+                persons = len([r for r in self.routes if r.RA == ra['id'] and r.PR == pr['id']])
+
+                flows.append({
+                    "from": ra['id'],
+                    "to": pr['id'],
+                    "persons": persons,
+                })
+        # get clusters
+        clusters = []
+
+        for i, c in enumerate(self.cluster_mapper.clusters):
+            clusters.append({
+                "id": i,
+                "start_sec": c.start_time,
+                "RAs": c.ra_ids,
+            })
+
+        return {
+            "ZFW": "???",
+            "num_iterations": number_of_iterations,
+            "total_runtime": max([(r.cluster.start_time + r.distance) for r in self.routes]),
+            "metaheuristik": "GeneticMetaheuristiken",
+            "flows": flows,
+            "clusters": clusters
+        }
