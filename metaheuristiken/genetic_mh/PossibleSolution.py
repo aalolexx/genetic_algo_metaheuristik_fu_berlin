@@ -162,6 +162,8 @@ class PossibleSolution:
         for ra in self.ra_list:
             for pr in self.pr_list:
                 persons = len([r for r in self.routes if r.RA == ra['id'] and r.PR == pr['id']])
+                if persons==0:
+                    continue
 
                 flows.append({
                     "from": ra['id'],
@@ -171,12 +173,17 @@ class PossibleSolution:
         # get clusters
         clusters = []
 
-        for i, c in enumerate(self.cluster_mapper.clusters):
+        i = 0
+        for c in self.cluster_mapper.clusters:
+            if len(c.ra_ids)==0:
+                continue
+
             clusters.append({
                 "id": i,
                 "start_sec": c.start_time,
                 "RAs": c.ra_ids,
             })
+            i+=1
 
         return {
             "ZFW": "???",
