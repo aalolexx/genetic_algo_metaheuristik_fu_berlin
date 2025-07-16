@@ -78,13 +78,14 @@ def main():
             print("STOPPING DUE TO NO IMPROVEMENT")
             break
 
-    best_loesung_json, bester_wert, best_solution = mh[0].gebe_endloesung_aus()
+    best_loesung_json, bester_wert = mh[0].gebe_endloesung_aus()
 
-    #print(best_loesung_json)
+    print(best_loesung_json)
     print(bester_wert)
     #TODO remove files best_losses.csv, average_losses.csv, best_solution_loss.csv, detailed_generation_loss.csv from being generated
 
-
+    # Ourt GeneticAlgorithm specific export functions
+    best_solution = mh[0].get_best_solution()
     best_solution.export_as_json(DURCHLAUF_VERZEICHNIS)
     plot_losses(DURCHLAUF_VERZEICHNIS)
     plot_loss_dict(DURCHLAUF_VERZEICHNIS)

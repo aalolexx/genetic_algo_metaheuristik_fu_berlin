@@ -168,8 +168,12 @@ class GeneticMetaheuristik(Metaheuristik):
         # save in ouput directory
         best_solution.write_solution_to_file(self.durchlauf_verzeichnis, self.iteration_counter)
 
-    def gebe_endloesung_aus(self):
-        best_solution = self.generations[-1].get_best()
 
-        return best_solution.convert_to_desired_format(number_of_iterations=len(self.generations)), self.bewerte_loesung(), best_solution
+    def gebe_endloesung_aus(self):
+        best_solution = self.get_best_solution()
+        return best_solution.convert_to_desired_format(number_of_iterations=len(self.generations)), self.bewerte_loesung()
+
+    
+    def get_best_solution(self):
+        return self.generations[-1].get_best() 
 
