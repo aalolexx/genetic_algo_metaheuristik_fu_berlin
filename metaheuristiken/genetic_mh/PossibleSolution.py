@@ -152,7 +152,7 @@ class PossibleSolution:
 
         print(f"Possible solution exported to {export_path}")
 
-    def convert_to_desired_format(self, number_of_iterations):
+    def convert_to_desired_format(self, number_of_iterations, start_time):
 
         # get flows
         flows = []
