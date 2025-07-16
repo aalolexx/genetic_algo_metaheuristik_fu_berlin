@@ -119,17 +119,17 @@ routing and clustering solutions over multiple generations.
 Key features:
 
 Initialization:  
-_initialisiere(self)_ enerates an initial population of possible evacuation plans based on input data (RAs, RPs, edges).
+_initialisiere()_ enerates an initial population of possible evacuation plans based on input data (RAs, RPs, edges).
 
-Iteration (iteriere):  
-_iteriere(self)_ creates new generations through crossovers, mutations, elite preservation, and solution repair.
+Iteration:  
+_iteriere()_ creates new generations through crossovers, mutations, elite preservation, and solution repair.
 
 Evaluation:  
-_bewerte_loesung(self)_ returns the loss value for the best solution of that iteration. The loss function in this 
+_bewerte_loesung()_ returns the loss value for the best solution of that iteration. The loss function in this 
 implementation is a combination of weighted street overflow, RP overflow and time of the evacuation.
 
 Final Output:  
-_speichere_zwischenergebnis(self)_ returns the best evolved solution in the required output format given in [.../example_mh_beispiel/evacuation_result.json](./data/output/example_mh_beispiel/evacuation_result.json).
+_speichere_zwischenergebnis()_ returns the best evolved solution in the required output format given in [.../example_mh_beispiel/evacuation_result.json](./data/output/example_mh_beispiel/evacuation_result.json).
 
 
 It builds on a base Metaheuristik class and uses utilities for solution creation, mutation, crossover, and repair.
