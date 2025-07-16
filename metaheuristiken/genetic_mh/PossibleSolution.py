@@ -151,7 +151,7 @@ class PossibleSolution:
 
         print(f"Possible solution exported to {export_path}")
 
-    def convert_to_desired_format(self, number_of_iterations="undefined"):
+    def convert_to_desired_format(self, number_of_iterations):
 
         # get flows
         flows = []
@@ -183,7 +183,7 @@ class PossibleSolution:
             i+=1
 
         return {
-            "ZFW": "???",
+            "ZFW": self.loss,
             "num_iterations": number_of_iterations,
             "total_runtime": self.convert_to_time(max([(r.cluster.start_time + r.distance) for r in self.routes])),
             "metaheuristik": "GeneticMetaheuristic",
@@ -195,7 +195,7 @@ class PossibleSolution:
         export_path = os.path.join(directory, f"evacuation_result_iteration_{iteration}.json")
         os.makedirs(os.path.dirname(export_path), exist_ok=True)
         with open(export_path, "w") as f:
-            json.dump(self.convert_to_desired_format(), f, indent=2)
+            json.dump(self.convert_to_desired_format(iteration), f, indent=2)
 
     # converto to min (s = 4km/h)
     def convert_to_time(self, value):
