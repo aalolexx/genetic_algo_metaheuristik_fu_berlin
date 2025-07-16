@@ -2,7 +2,7 @@
 
 This repository contains an implementation of a genetic algorithm used in metaheuristics. It is adapted to solve the 
 problems of finding a satisfying solution for an evacuation problem taking into account maximum street capacities, 
-maximum RP capacities and evacuation time.
+maximum rescue point capacities and evacuation time.
 
 ## Installation
 
@@ -23,7 +23,7 @@ pip install -r requirements.txt
 ### Genetic Algorithms
 
 Genetic algorithms are optimization methods inspired by natural evolution. They can solve complex problems by 
-evolving a population of possible solutions over time to find better ones. A Solution's fittness is rated by a loss 
+evolving a population of possible solutions over time to find better ones. A solution's fittness is rated by a loss 
 function and during runtime of the algorithm, those loss values will (mostly) continuously be lowered while better 
 solutions are approached. At the same time, one of the biggest advantages of genetic algorithms are randomized 
 procedures, namely crossover and mutation, to explore a wider range of solutions and to not get stuck in local minima. 
@@ -33,7 +33,7 @@ Futher explanation of genetic algorithms can be found in [S. Ólafsson (2006)](h
 ### Crossover Mechanism
 
 The crossover operation is responsible for combining two parent solutions to generate a new child solution. A random 
-crossover point is selected, and the goal RPs (RP) from both parents are combined — the first segment  
+crossover point is selected, and the rescue points (RPs) from both parents are combined - the first segment  
 coming from parent 1 and the second from parent 2.
 
 Only the RP assignments are mixed; the rest of the route structure remains unchanged. This strategy ensures 
@@ -52,8 +52,8 @@ Three kinds of mutation are applied:
 
 Cluster Reordering:  
 With a certain probability, the assignment of RPs to clusters is modified. This is done either by 
-redistributing all RPs among existing clusters (reclustering) or by randomly reassigning individual RAs to different 
-clusters, helping to explore new clustering configurations.
+redistributing all RPs among existing clusters (reclustering) or by randomly reassigning individual residential areas 
+RAs to different clusters, helping to explore new clustering configurations.
 
 Cluster Start Time Adjustment:  
 Some clusters have their start time shifted slightly (by up to ±5000 seconds). This helps in fine-tuning the  
@@ -88,12 +88,12 @@ This part will briefly summarize the used classes in this project.
 ### Cluster(object):
 
 The _[Cluster](./metaheuristiken/genetic_mh/Cluster.py)_ class represents a group of people who start evacuation 
-from a specific residential area (RA) at the same 
-time and head towards a specific rescue point (RP).
+from a specific residential area (RA) at the same time and head towards a specific rescue point (RP).
 
 ### ClusterMapper(object):
 
-The _[ClusterMapper](./metaheuristiken/genetic_mh/ClusterMapper.py)_ class is responsible for organizing a list of residential areas into a specified number of clusters.
+The _[ClusterMapper](./metaheuristiken/genetic_mh/ClusterMapper.py)_ class is responsible for organizing a list of 
+RAs into a specified number of clusters.
 
 This module provides essential functionality for managing clusters of RPs. It supports random  
 initialization, where RAs are distributed across clusters in a balanced way based on their population, promoting  
@@ -148,10 +148,7 @@ be exoirted into the ouput directory.
 ### PossibleSolution
 
 The _[PossibleSolution](./metaheuristiken/genetic_mh/PossibleSolution.py)_ class models a solution for the 
-evacuation problem, 
-assigning rescue 
-routes from RAs to 
-RPs 
+evacuation problem, assigning rescue routes from RAs to RPs 
 while managing clustering, capacity, and timing. It calculates a loss based on street overload, RP overflow, and overall 
 duration. The class supports outputting the solution as JSON or in a custom format given in 
 [.../example_mh_beispiel/evacuation_result.json](data/output/example_mh_beispiel/evacuation_result.json).
@@ -163,7 +160,8 @@ available capacity and randomizing starting times to counter overflown street ca
 
 ### Route
 
-The _[Route](./metaheuristiken/genetic_mh/Route.py)_ class symbolized an edge between residential area and RP. It carries information about the 
+The _[Route](./metaheuristiken/genetic_mh/Route.py)_ class symbolized an edge between RA and RP. It carries 
+information about the 
 edge's length and to which cluster the route belongs to. The class also provides the funcionality to groupe individual 
 people into small groups. This can reduce the computation time significantly but also reduce the result quality if 
 chosen poorly, because individuals are more efficiently to manage than groups regarding street capacity and RP 
