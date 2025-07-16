@@ -131,7 +131,7 @@ implementation is a combination of weighted street overflow, RP overflow and tim
 Saving interim results:
 _speichere_zwischenergebnis()_ returns the best evolved solution in the required output format given in [.../example_mh_beispiel/evacuation_result.json](./data/output/example_mh_beispiel/evacuation_result.json).
 
-Final output: 
+Final output:  
 _gebe_endloesung_aus()_ returns the best solution and its loss value.
 
 It builds on a base Metaheuristik class and uses utilities for solution creation, mutation, crossover, and repair.
@@ -164,7 +164,7 @@ available capacity and randomizing starting times to counter overflown street ca
 
 The _[Route](./metaheuristiken/genetic_mh/Route.py)_ class symbolized an edge between RA and RP. It carries 
 information about the 
-edge's length and to which cluster the route belongs to. The class also provides the funcionality to groupe individual 
+edge's length and to which cluster the route belongs. The class also provides the funcionality to groupe individual 
 people into small groups. This can reduce the computation time significantly but also reduce the result quality if 
 chosen poorly, because individuals are more efficiently to manage than groups regarding street capacity and RP 
 capacity.
