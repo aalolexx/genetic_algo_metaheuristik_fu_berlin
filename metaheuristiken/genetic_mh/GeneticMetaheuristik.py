@@ -25,8 +25,24 @@ class GeneticMetaheuristik(Metaheuristik):
         self.generations = []
         self.iteration_counter = 0
 
+        self.max_iteration = float('inf')
+        self.max_runtime = float('inf')
+        self.runtime = 0
+
+        try:
+            self.max_iteration = self.konfiguration['max_iterationen']
+        except KeyError:
+            print("No 'max_iterationen' in config file. Set maximum interation to INFINITE.")
+
+        try:
+            self.max_runtime = self.konfiguration['max_laufzeit']
+        except KeyError:
+            print("No 'max_laufzeit' in config file. Set maximum runtime to INFINITE.")
+
         
     def initialisiere(self):
+        start = time.time()
+
         # read graph data and set some general variable
         self.ra_list = self.eingabe_daten["residential_areas"]
         self.pr_list = self.eingabe_daten["places_of_refuge"]
@@ -67,72 +83,93 @@ class GeneticMetaheuristik(Metaheuristik):
         self.generations.append(first_generation)
         self.iteration_counter = 1
 
+        end = time.time()
+        self.runtime += (end - start)
+
+        print(f"Initialization took {self.format_time(end - start)}.")
+
+
+
+
 
     def iteriere(self):
         """
         In the iteration we create a new generation of possible solutions
         """
-        latest_generation = self.generations[-1]
-        new_generation = Generation()
-        
-        # TODO maybe put the percentages also in the conf
-        num_childs = self.konfiguration["population_size"]
-        num_crossovers =  math.floor(num_childs * 0.2)
-        num_explorative_mutants = math.floor(num_childs * 0.5)
-        #num_new_random_solutions = math.floor(num_childs * 0)
-        num_elits = math.floor(num_childs * 0.1)
-        num_repairs= math.floor(num_childs * 0.2)
+        start = time.time()
 
-        # ----
-        # CROSSOVERS
-        print("- Generating Crossovers")
-        for i in range(num_crossovers):
-            parent1, parent2 = GeneticUtils.select_two_by_roulette(latest_generation)
-            child = GeneticUtils.mutation_crossover(parent1, parent2, self.pr_list)
-            new_generation.append(child)
+        if self.iteration_counter <= self.max_iteration and self.runtime < self.max_runtime:
 
-        # ----
-        # EXPLORATIVE MUTANTS
-        print("- Explorative Mutants")
-        for i in range(num_explorative_mutants):
-            parent1, _ = GeneticUtils.select_two_by_roulette(latest_generation)
-            child = GeneticUtils.apply_mutation(parent1, self.pr_list)
-            new_generation.append(child)
+            latest_generation = self.generations[-1]
+            new_generation = Generation()
 
-        # Removed this one due to performance and not really bringing benefits
-        # ----
-        # RANDOM NEW SOLUTIONS
-        #for i in range(num_new_random_solutions):
-        #    child = GeneticUtils.create_new_possible_solution(self.pr_list, self.ra_list, self.edges_list, self.max_street_capacity, self.konfiguration["num_clusters"])
-        #    new_generation.append(child)
+            # TODO maybe put the percentages also in the conf
+            num_childs = self.konfiguration["population_size"]
+            num_crossovers =  math.floor(num_childs * 0.2)
+            num_explorative_mutants = math.floor(num_childs * 0.5)
+            #num_new_random_solutions = math.floor(num_childs * 0)
+            num_elits = math.floor(num_childs * 0.1)
+            num_repairs= math.floor(num_childs * 0.2)
 
-        # ----
-        # ELITS
-        print("- Getting Elits")
-        elits = sorted(latest_generation, key=lambda p: p.loss)[:num_elits]
-        for elit in elits:
-            elit.birth_type = "elit"
-        new_generation += elits
+            # ----
+            # CROSSOVERS
+            print("- Generating Crossovers")
+            for i in range(num_crossovers):
+                parent1, parent2 = GeneticUtils.select_two_by_roulette(latest_generation)
+                child = GeneticUtils.mutation_crossover(parent1, parent2, self.pr_list)
+                new_generation.append(child)
 
-        # ----
-        # REPAIRS -> get the best solutions and repair them (no PR overflows ) # TODO also fix Street capacity here
-        print("- Generating Repairs")
-        repair_candidates = sorted(latest_generation, key=lambda p: p.loss)[:num_repairs]
-        for repair_candidate in repair_candidates:
-            repaired = RepairUtils.repair_possible_solution(deepcopy(repair_candidate))
-            repaired.birth_type = "repaired"
-            new_generation.append(repaired)
+            # ----
+            # EXPLORATIVE MUTANTS
+            print("- Explorative Mutants")
+            for i in range(num_explorative_mutants):
+                parent1, _ = GeneticUtils.select_two_by_roulette(latest_generation)
+                child = GeneticUtils.apply_mutation(parent1, self.pr_list)
+                new_generation.append(child)
 
-        # Set losses
-        print("Calculating Losses")
-        new_generation.set_losses()
+            # Removed this one due to performance and not really bringing benefits
+            # ----
+            # RANDOM NEW SOLUTIONS
+            #for i in range(num_new_random_solutions):
+            #    child = GeneticUtils.create_new_possible_solution(self.pr_list, self.ra_list, self.edges_list, self.max_street_capacity, self.konfiguration["num_clusters"])
+            #    new_generation.append(child)
 
-        self.generations.append(new_generation)
-        self.iteration_counter += 1
+            # ----
+            # ELITS
+            print("- Getting Elits")
+            elits = sorted(latest_generation, key=lambda p: p.loss)[:num_elits]
+            for elit in elits:
+                elit.birth_type = "elit"
+            new_generation += elits
 
-        # clean old generations to save storage
-        if len(self.generations) > 3:
-            self.generations.pop(0)
+            # ----
+            # REPAIRS -> get the best solutions and repair them (no PR overflows ) # TODO also fix Street capacity here
+            print("- Generating Repairs")
+            repair_candidates = sorted(latest_generation, key=lambda p: p.loss)[:num_repairs]
+            for repair_candidate in repair_candidates:
+                repaired = RepairUtils.repair_possible_solution(deepcopy(repair_candidate))
+                repaired.birth_type = "repaired"
+                new_generation.append(repaired)
+
+            # Set losses
+            print("Calculating Losses")
+            new_generation.set_losses()
+
+            self.generations.append(new_generation)
+            self.iteration_counter += 1
+
+            # clean old generations to save storage
+            if len(self.generations) > 3:
+                self.generations.pop(0)
+
+        else:
+            print(f"Reached maximum time or iteration limit.")
+
+        end = time.time()
+        self.runtime += end - start
+
+        print(f"Iteration took {self.format_time(end - start)}. Total time runnnig: {self.format_time(self.runtime)}.")
+
 
 
     def bewerte_loesung(self):
@@ -173,3 +210,6 @@ class GeneticMetaheuristik(Metaheuristik):
 
         return best_solution.convert_to_desired_format(number_of_iterations=len(self.generations)) , self.bewerte_loesung()
 
+    # converty time span in a nicely readable format
+    def format_time(self, time):
+        return f"{round(time, 2)}s" if time < 60 else f"{round(time/60, 1)}m"
