@@ -177,7 +177,7 @@ class PossibleSolution:
 
             clusters.append({
                 "id": i,
-                "start_sec": (c.start_time/1000)/4*60, # converto to min (s = 4km/h)
+                "start_sec": round((c.start_time/1000)/4*60), # converto to min (s = 4km/h)
                 "RAs": c.ra_ids,
             })
             i+=1
