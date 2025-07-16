@@ -43,7 +43,6 @@ class GeneticMetaheuristik(Metaheuristik):
         print(f"City RAs capacity: total={sum(pr_capacity_array)}, max RA={max(pr_capacity_array)}, mean RA={np.mean(pr_capacity_array)}, min RA={min(pr_capacity_array)}")
         del pr_capacity_array
 
-        print(f"Routes to calculate: {len(self.ra_list)}")
         print("-------------------")
 
         city_population = sum([ra["population"] for ra in self.ra_list])
@@ -56,7 +55,7 @@ class GeneticMetaheuristik(Metaheuristik):
 
         print("Generating Initial Start Population..")
         for i in range(self.konfiguration["population_size"]): #"population_size" as in: population of solutions, not city_population
-            possible_solution = GeneticUtils.create_new_possible_solution(self.pr_list, self.ra_list, self.edges_list, self.max_street_capacity, self.konfiguration["num_clusters"])
+            possible_solution = GeneticUtils.create_new_possible_solution(self.pr_list, self.ra_list, self.edges_list, self.max_street_capacity, self.konfiguration["num_clusters"], self.konfiguration["route_group_size"])
             print(f"done with init population {i}/{self.konfiguration['population_size']}")
             first_generation.append(possible_solution)
 

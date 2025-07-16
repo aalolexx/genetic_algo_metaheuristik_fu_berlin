@@ -40,7 +40,7 @@ class PossibleSolution:
     def get_loss_dict(self):
         amount_street_overflows, street_overflow_sum, normalized_time, steps_took = self.get_street_overflows()
 
-        population_size = len(self.routes)
+        population_size = np.sum([r.group_size for r in self.routes])
         normalized_street_overflow = street_overflow_sum / self.max_street_capacity / population_size
 
         sum_pr_overflows = self.get_sum_pr_overflows()
@@ -67,8 +67,8 @@ class PossibleSolution:
             enter_time = route.cluster.start_time
             exit_time = route.cluster.start_time + route.distance
 
-            events.append((enter_time, 1))   # person enters street
-            events.append((exit_time, -1))  # person leaves street
+            events.append((enter_time, route.group_size))   # person enters street
+            events.append((exit_time, -1 * route.group_size))  # person leaves street
 
             if route.distance > longest_distance:
                 longest_distance = route.distance
@@ -91,9 +91,7 @@ class PossibleSolution:
         # Normalize last_event_time
         normalized_time = last_event_time / longest_distance -1 # 0 would be the optimal solution
         #print(f"STREET OVERFLOW: {amount_street_overflows}, {street_overflow_sum}, {normalized_time}, {last_event_time}")
-
         return amount_street_overflows, street_overflow_sum, normalized_time, last_event_time
-
 
 
     # gets the amount of PR overflows
@@ -106,7 +104,7 @@ class PossibleSolution:
             pr['current_usage'] = 0
 
         for route in self.routes:
-            next(pr for pr in prs_with_usage if pr['id'] == route.PR)['current_usage'] += 1
+            next(pr for pr in prs_with_usage if pr['id'] == route.PR)['current_usage'] += route.group_size
 
         for pr in prs_with_usage:
             if pr['current_usage'] > pr['capacity']:

@@ -134,8 +134,8 @@ def plot_people_on_street(path, routes, your_max_capacity, step_size=10):
     for route in routes:
         start = route.cluster.start_time
         end = route.cluster.start_time + route.distance
-        time_events.append((start, +1))
-        time_events.append((end, -1))
+        time_events.append((start, route.group_size))
+        time_events.append((end, -1 * route.group_size))
 
     time_events.sort()
     current_people = 0
@@ -232,7 +232,7 @@ def plot_pr_usage_vs_capacity(path, routes, pr_list):
     # Count how many people are assigned to each PR
     for route in routes:
         if route.PR in pr_usage:
-            pr_usage[route.PR] += 1
+            pr_usage[route.PR] += route.group_size
         else:
             print(f"Warning: PR {route.PR} not found in PR list")
 
