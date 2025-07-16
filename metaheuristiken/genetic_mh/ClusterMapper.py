@@ -53,8 +53,9 @@ class ClusterMapper():
         if cluster_with_ra is None:
             return # can happen if it's been removed in the same mutation
 
-        weights = [c.size for c in self.clusters]
+        weights = [1 / (c.size + 0.001) for c in self.clusters]
         random_cluster = random.choices(self.clusters, weights=weights, k=1)[0]
+        
         cluster_with_ra.ra_ids.remove(ra_id)
         random_cluster.ra_ids.append(ra_id)
 
@@ -64,7 +65,7 @@ class ClusterMapper():
         Keeps the cluster start_times but reorders the RAs in it
         """
         # TODO this method can be somhow combined with the get_random_cluster_distribution function (duplicated code fragments)
-        cluster_size = math.floor(len(self.ra_list) / self.num_clusters)
+        cluster_size = math.ceil(len(self.ra_list) / self.num_clusters)
         areas_to_evacuate = deepcopy(self.ra_list)
 
         for cluster in self.clusters:
