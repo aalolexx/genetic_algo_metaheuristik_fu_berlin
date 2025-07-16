@@ -171,5 +171,5 @@ class GeneticMetaheuristik(Metaheuristik):
     def gebe_endloesung_aus(self):
         best_solution = self.generations[-1].get_best()
 
-        return best_solution.convert_to_desired_format(number_of_iterations=len(self.generations)) , self.bewerte_loesung()
+        return best_solution.convert_to_desired_format(number_of_iterations=len(self.generations)), self.bewerte_loesung(), best_solution
 
