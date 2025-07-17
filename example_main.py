@@ -34,14 +34,14 @@ def lade_daten_aus_json(dateipfad):
 def main():
     eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "small_evacuation_data.json"))
 
-    CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'genetic_mh_config.json')
+    CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'geneticMetaheuristic_small_config.json')
 
     with open(CONFIG_DATEI, 'r', encoding='utf-8') as f:
         file_content = ''.join(f.readlines())
         konfigurations_daten = lade_konfiguration_aus_json(file_content)
         config_hash = md5(file_content.encode('utf-8')).hexdigest()
 
-    DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'geneticMetaheuristic_INSTANZ_{config_hash}_{int(time.time())}')
+    DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'geneticMetaheuristic_small_{config_hash}_{int(time.time())}')
 
     mh = []
     mh.append(

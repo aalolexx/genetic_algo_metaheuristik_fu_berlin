@@ -37,7 +37,7 @@ os.makedirs(OUTPUT_VERZEICHNIS)
 
 def test_1_definition():
     eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "example_evacuation_data.json"))
-    CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'genetic_mh_config.json')
+    CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'geneticMetaheuristic_small_config.json')
 
     with open(CONFIG_DATEI, 'r', encoding='utf-8') as f:
         file_content = ''.join(f.readlines())
@@ -56,7 +56,7 @@ def test_1_definition():
 
 def test_2_saved_file_name():
     eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "example_evacuation_data.json"))
-    CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'genetic_mh_config.json')
+    CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'geneticMetaheuristic_small_config.json')
 
     with open(CONFIG_DATEI, 'r', encoding='utf-8') as f:
         file_content = ''.join(f.readlines())
@@ -80,7 +80,7 @@ def test_2_saved_file_name():
 
 def test_3_number_of_people():
     eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "middle_evacuation_data.json"))
-    CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'genetic_mh_config.json')
+    CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'geneticMetaheuristic_small_config.json')
 
     with open(CONFIG_DATEI, 'r', encoding='utf-8') as f:
         file_content = ''.join(f.readlines())
