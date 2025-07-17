@@ -1,7 +1,7 @@
 import random
 from copy import deepcopy
-from metaheuristiken.genetic_mh.PossibleSolution import PossibleSolution
-from metaheuristiken.genetic_mh.Route import Route
+from metaheuristiken.geneticMetaheuristic.PossibleSolution import PossibleSolution
+from metaheuristiken.geneticMetaheuristic.Route import Route
 import numpy as np
 import math
 from collections import defaultdict

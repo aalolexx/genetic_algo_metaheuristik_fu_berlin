@@ -1,4 +1,4 @@
-from metaheuristiken.genetic_mh.GeneticMetaheuristik import GeneticMetaheuristik
+from metaheuristiken.geneticMetaheuristic.GeneticMetaheuristik import GeneticMetaheuristik
 import os
 from hashlib import md5
 import time

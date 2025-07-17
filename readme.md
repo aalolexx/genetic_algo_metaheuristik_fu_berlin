@@ -87,12 +87,12 @@ This part will briefly summarize the used classes in this project.
 
 ### Cluster(object):
 
-The _[Cluster](./metaheuristiken/genetic_mh/Cluster.py)_ class represents a group of people who start evacuation 
+The _[Cluster](metaheuristiken/geneticMetaheuristic/Cluster.py)_ class represents a group of people who start evacuation 
 from a specific residential area (RA) at the same time and head towards a specific rescue point (RP).
 
 ### ClusterMapper(object):
 
-The _[ClusterMapper](./metaheuristiken/genetic_mh/ClusterMapper.py)_ class is responsible for organizing a list of 
+The _[ClusterMapper](metaheuristiken/geneticMetaheuristic/ClusterMapper.py)_ class is responsible for organizing a list of 
 RAs into a specified number of clusters.
 
 This module provides essential functionality for managing clusters of RPs. It supports random  
@@ -104,7 +104,7 @@ RAs while preserving the original cluster start times.
 
 ### Generation(list):
 
-The _[Generation](./metaheuristiken/genetic_mh/Generation.py)_ class represents a population of possible solutions 
+The _[Generation](metaheuristiken/geneticMetaheuristic/Generation.py)_ class represents a population of possible solutions 
 for the evacuation problem at a specific 
 iteration. It extends a standard list with additional methods to evaluate and analyze the solutions. It can compute 
 the loss for each individual, identify the best solution and calculate the 
@@ -113,7 +113,7 @@ loss values and additional information for all individuals, which is useful for 
 
 
 ### GeneticMetaheuristik(Metaheuristik)
-The _[GeneticMetaheuristik](./metaheuristiken/genetic_mh/GeneticMetaheuristik.py)_ class implements a genetic algorithm to solve evacuation planning problems by evolving 
+The _[GeneticMetaheuristik](metaheuristiken/geneticMetaheuristic/GeneticMetaheuristik.py)_ class implements a genetic algorithm to solve evacuation planning problems by evolving 
 routing and clustering solutions over multiple generations.
 
 Key features:
@@ -139,17 +139,17 @@ It builds on a base Metaheuristik class and uses utilities for solution creation
 
 ### GeneticUtils
 
-The _[GeneticUtils](./metaheuristiken/genetic_mh/GeneticUtils.py)_ module provides core utility functions for genetic algorithm operations used in 
+The _[GeneticUtils](metaheuristiken/geneticMetaheuristic/GeneticUtils.py)_ module provides core utility functions for genetic algorithm operations used in 
 GeneticMetaheuristik,  including selection, crossover, mutation, and generation of initial solutions.
 
 ### PlotUtils.py
 
-The _[PlotUtils](./metaheuristiken/genetic_mh/PlotUtils.py)_ module provides a variety of visualising the progress and final solution of the problem, which can 
+The _[PlotUtils](metaheuristiken/geneticMetaheuristic/PlotUtils.py)_ module provides a variety of visualising the progress and final solution of the problem, which can 
 be exoirted into the ouput directory.
 
 ### PossibleSolution
 
-The _[PossibleSolution](./metaheuristiken/genetic_mh/PossibleSolution.py)_ class models a solution for the 
+The _[PossibleSolution](metaheuristiken/geneticMetaheuristic/PossibleSolution.py)_ class models a solution for the 
 evacuation problem, assigning rescue routes from RAs to RPs 
 while managing clustering, capacity, and timing. It calculates a loss based on street overload, RP overflow, and overall 
 duration. The class supports outputting the solution as JSON or in a custom format given in 
@@ -157,12 +157,12 @@ duration. The class supports outputting the solution as JSON or in a custom form
 
 ### RepairUtils.py
 
-The _[RepairUtils](./metaheuristiken/genetic_mh/RepairUtils.py)_ module tries to improve/repair solutions by redistributing routes to underutilized RPs with 
+The _[RepairUtils](metaheuristiken/geneticMetaheuristic/RepairUtils.py)_ module tries to improve/repair solutions by redistributing routes to underutilized RPs with 
 available capacity and randomizing starting times to counter overflown street capacities.
 
 ### Route
 
-The _[Route](./metaheuristiken/genetic_mh/Route.py)_ class symbolized an edge between RA and RP. It carries 
+The _[Route](metaheuristiken/geneticMetaheuristic/Route.py)_ class symbolized an edge between RA and RP. It carries 
 information about the 
 edge's length and to which cluster the route belongs. The class also provides the funcionality to groupe individual 
 people into small groups. This can reduce the computation time significantly but also reduce the result quality if 

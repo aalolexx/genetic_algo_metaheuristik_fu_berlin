@@ -1,5 +1,5 @@
-from metaheuristiken.genetic_mh.Route import Route
-from metaheuristiken.genetic_mh.ClusterMapper import ClusterMapper
+from metaheuristiken.geneticMetaheuristic.Route import Route
+from metaheuristiken.geneticMetaheuristic.ClusterMapper import ClusterMapper
 from copy import deepcopy
 import numpy as np
 import json

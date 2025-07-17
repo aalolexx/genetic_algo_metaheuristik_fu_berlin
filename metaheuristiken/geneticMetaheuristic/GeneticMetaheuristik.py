@@ -1,9 +1,9 @@
 from basis.metaheuristik import Metaheuristik
 import random
-from metaheuristiken.genetic_mh.Route import Route
-from metaheuristiken.genetic_mh.Generation import Generation
-from metaheuristiken.genetic_mh import GeneticUtils
-from metaheuristiken.genetic_mh import RepairUtils
+from metaheuristiken.geneticMetaheuristic.Route import Route
+from metaheuristiken.geneticMetaheuristic.Generation import Generation
+from metaheuristiken.geneticMetaheuristic import GeneticUtils
+from metaheuristiken.geneticMetaheuristic import RepairUtils
 import math
 from copy import deepcopy
 import time

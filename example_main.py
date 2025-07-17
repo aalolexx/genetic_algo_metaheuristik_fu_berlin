@@ -1,8 +1,8 @@
 import os
 import json
 from hashlib import md5
-from metaheuristiken.genetic_mh.GeneticMetaheuristik import GeneticMetaheuristik
-from metaheuristiken.genetic_mh.PlotUtils import plot_losses, plot_routes_timeline, plot_people_on_street, plot_loss_dict, plot_generation_birthtype_loss, plot_pr_usage_vs_capacity
+from metaheuristiken.geneticMetaheuristic.GeneticMetaheuristik import GeneticMetaheuristik
+from metaheuristiken.geneticMetaheuristic.PlotUtils import plot_losses, plot_routes_timeline, plot_people_on_street, plot_loss_dict, plot_generation_birthtype_loss, plot_pr_usage_vs_capacity
 import time
 
 # Verzeichnisse
