@@ -4,6 +4,7 @@ from copy import deepcopy
 import numpy as np
 import json
 import os
+import time
 
 class PossibleSolution:
     def __init__(self, pr_list, ra_list, edges_list, num_clusters, max_street_capacity, routes=[], birth_type=""):
@@ -151,7 +152,7 @@ class PossibleSolution:
 
         print(f"Possible solution exported to {export_path}")
 
-    def convert_to_desired_format(self, number_of_iterations):
+    def convert_to_desired_format(self, number_of_iterations, start_time):
 
         # get flows
         flows = []
@@ -185,17 +186,17 @@ class PossibleSolution:
         return {
             "ZFW": self.loss,
             "num_iterations": number_of_iterations,
-            "total_runtime": self.convert_to_time(max([(r.cluster.start_time + r.distance) for r in self.routes])),
+            "total_runtime": time.time() - start_time,
             "metaheuristik": "GeneticMetaheuristic",
             "flows": flows,
             "clusters": clusters
         }
 
-    def write_solution_to_file(self, directory, iteration):
+    def write_solution_to_file(self, directory, iteration, start_time):
         export_path = os.path.join(directory, f"evacuation_result_iteration_{iteration}.json")
         os.makedirs(os.path.dirname(export_path), exist_ok=True)
         with open(export_path, "w") as f:
-            json.dump(self.convert_to_desired_format(iteration), f, indent=2)
+            json.dump(self.convert_to_desired_format(iteration, start_time), f, indent=2)
 
     # converto to min (s = 4km/h)
     def convert_to_time(self, value):
