@@ -5,6 +5,8 @@ import numpy as np
 import json
 import os
 import time
+from collections import defaultdict
+
 
 class PossibleSolution:
     def __init__(self, pr_list, ra_list, edges_list, num_clusters, max_street_capacity, routes=[], birth_type=""):
@@ -155,14 +157,16 @@ class PossibleSolution:
     def convert_to_desired_format(self, number_of_iterations, start_time):
 
         # get flows
-        flows = []
+        route_counts = defaultdict(int)
+        for r in self.routes:
+            route_counts[(r.RA, r.PR)] += r.group_size
 
+        flows = []
         for ra in self.ra_list:
             for pr in self.pr_list:
-                persons = len([r for r in self.routes if r.RA == ra['id'] and r.PR == pr['id']])
-                if persons==0:
+                persons = route_counts.get((ra['id'], pr['id']), 0)
+                if persons == 0:
                     continue
-
                 flows.append({
                     "from": ra['id'],
                     "to": pr['id'],
