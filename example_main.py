@@ -41,7 +41,7 @@ def main():
         konfigurations_daten = lade_konfiguration_aus_json(file_content)
         config_hash = md5(file_content.encode('utf-8')).hexdigest()
 
-    DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'geneticMetaheuristic_INSTANZ_{config_hash}')
+    DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'geneticMetaheuristic_INSTANZ_{config_hash}_{int(time.time())}')
 
     mh = []
     mh.append(

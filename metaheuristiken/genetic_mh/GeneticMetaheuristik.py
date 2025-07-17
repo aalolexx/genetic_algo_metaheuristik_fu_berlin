@@ -96,7 +96,11 @@ class GeneticMetaheuristik(Metaheuristik):
         print("- Explorative Mutants")
         for i in range(num_explorative_mutants):
             parent1, _ = GeneticUtils.select_two_by_roulette(latest_generation)
-            child = GeneticUtils.apply_mutation(parent1, self.pr_list)
+            child = GeneticUtils.apply_mutation(
+                possible_solution=parent1,
+                all_prs=self.pr_list,
+                route_change_rate=random.randrange(20,90)/100
+            )
             new_generation.append(child)
 
         # Removed this one due to performance and not really bringing benefits
