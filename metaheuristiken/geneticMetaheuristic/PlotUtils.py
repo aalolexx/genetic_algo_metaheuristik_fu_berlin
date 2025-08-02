@@ -2,10 +2,7 @@ import matplotlib.pyplot as plt
 import os
 import random
 import matplotlib.cm as cm
-import csv
-import json
 import ast
-import matplotlib.colors as mcolors
 import numpy as np
 from collections import defaultdict
 

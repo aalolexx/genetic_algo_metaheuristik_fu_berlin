@@ -2,7 +2,6 @@ import math
 from copy import deepcopy
 import random
 from metaheuristiken.geneticMetaheuristic.Cluster import Cluster
-import numpy as np
 
 class ClusterMapper():
     """

@@ -1,6 +1,5 @@
 from basis.metaheuristik import Metaheuristik
 import random
-from metaheuristiken.geneticMetaheuristic.Route import Route
 from metaheuristiken.geneticMetaheuristic.Generation import Generation
 from metaheuristiken.geneticMetaheuristic import GeneticUtils
 from metaheuristiken.geneticMetaheuristic import RepairUtils
