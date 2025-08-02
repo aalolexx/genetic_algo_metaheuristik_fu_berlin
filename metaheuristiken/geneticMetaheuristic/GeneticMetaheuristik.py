@@ -23,10 +23,14 @@ class GeneticMetaheuristik(Metaheuristik):
         # Genetic Algorithm specific properties
         self.generations = []
         self.iteration_counter = 0
+
         self.start_time = time.time()
+        self.iteration_times = []
 
         
     def initialisiere(self):
+        start_time = time.time()
+
         # read graph data and set some general variable
         self.ra_list = self.eingabe_daten["residential_areas"]
         self.pr_list = self.eingabe_daten["places_of_refuge"]
@@ -67,8 +71,12 @@ class GeneticMetaheuristik(Metaheuristik):
         self.generations.append(first_generation)
         self.iteration_counter = 1
 
+        end_time = time.time()
+        print(f"Initialization took {round((end_time - start_time)/60)} minutes.")
+
 
     def iteriere(self):
+        start_time = time.time()
         """
         In the iteration we create a new generation of possible solutions
         """
@@ -138,6 +146,9 @@ class GeneticMetaheuristik(Metaheuristik):
         if len(self.generations) > 3:
             self.generations.pop(0)
 
+        end_time = time.time()
+        self.iteration_times.append(end_time - start_time)
+        print(f"Average iteration time: {round((sum(self.iteration_times) / len(self.iteration_times)/60), 2)} minutes.")
 
     def bewerte_loesung(self):
         return self.generations[-1].get_best().loss
