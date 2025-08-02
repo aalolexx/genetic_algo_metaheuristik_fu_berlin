@@ -57,7 +57,7 @@ class GeneticMetaheuristik(Metaheuristik):
         print("Generating Initial Start Population..")
         for i in range(self.konfiguration["population_size"]): #"population_size" as in: population of solutions, not city_population
             possible_solution = GeneticUtils.create_new_possible_solution(self.pr_list, self.ra_list, self.edges_list, self.max_street_capacity, self.konfiguration["num_clusters"], self.konfiguration["route_group_size"])
-            print(f"done with init population {i}/{self.konfiguration['population_size']}")
+            print(f"done with init population {i+1}/{self.konfiguration['population_size']}")
             first_generation.append(possible_solution)
 
         first_generation.set_losses()

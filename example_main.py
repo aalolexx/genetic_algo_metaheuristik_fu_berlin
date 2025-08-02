@@ -66,7 +66,7 @@ def main():
             print("Maximum runtime was reached!")
             break
 
-        print(f"ITERATION {i}/{max_iterations}")
+        print(f"ITERATION {i+1}/{max_iterations}")
         mh[0].iteriere()
         mh[0].speichere_zwischenergebnis()
 
