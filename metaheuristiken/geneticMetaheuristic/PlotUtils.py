@@ -5,6 +5,7 @@ import matplotlib.cm as cm
 import ast
 import numpy as np
 from collections import defaultdict
+import re
 
 def plot_losses(path):
     """
@@ -175,6 +176,8 @@ def plot_generation_birthtype_loss(path, top_y=None):
             if not line:
                 continue
             try:
+                # remove the np.float64(...), as it is not valid python literal syntax and causes a Value error (at least for me)
+                line = re.sub(r'np\.float64\(([^)]+)\)', r'\1', line)
                 generation = ast.literal_eval(line)
                 generations.append(generation)
             except Exception as e:
