@@ -148,7 +148,14 @@ class GeneticMetaheuristik(Metaheuristik):
 
         end_time = time.time()
         self.iteration_times.append(end_time - start_time)
-        print(f"Average iteration time: {round((sum(self.iteration_times) / len(self.iteration_times)/60), 2)} minutes.")
+        print("Iteration time (current/avr/max/min): {} / {} / {} / {}  (minutes)".format(
+            round((self.iteration_times[-1]/60), 2),
+            round((sum(self.iteration_times)/len(self.iteration_times) / 60), 2),
+            round((max(self.iteration_times)/60), 2),
+            round((min(self.iteration_times)/60), 2)
+        ))
+
+        #
 
     def bewerte_loesung(self):
         return self.generations[-1].get_best().loss
