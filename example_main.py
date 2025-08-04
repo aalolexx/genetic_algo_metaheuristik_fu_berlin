@@ -32,9 +32,11 @@ def lade_daten_aus_json(dateipfad):
 
 #%%
 def main():
-    eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, "small_evacuation_data.json"))
+    DATASET = "middle"
 
-    CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, 'geneticMetaheuristic_small_config.json')
+    eingabe_daten = lade_daten_aus_json(os.path.join(INSTANZEN_VERZEICHNIS, f"{DATASET}_evacuation_data.json"))
+
+    CONFIG_DATEI = os.path.join(CONFIG_VERZEICHNIS, f'geneticMetaheuristic_{DATASET}_config.json')
 
     with open(CONFIG_DATEI, 'r', encoding='utf-8') as f:
         file_content = ''.join(f.readlines())
@@ -42,6 +44,7 @@ def main():
         config_hash = md5(file_content.encode('utf-8')).hexdigest()
 
     DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'geneticMetaheuristic_small_{config_hash}_{int(time.time())}')
+    DURCHLAUF_VERZEICHNIS = os.path.join(OUTPUT_VERZEICHNIS, f'geneticMetaheuristic_{DATASET}_{config_hash}_{int(time.time())}')
 
     mh = []
     mh.append(
@@ -82,6 +85,9 @@ def main():
         
         if no_improvement_counter > patience:
             print("STOPPING DUE TO NO IMPROVEMENT")
+            break
+        # manually stop after iteration by creating this specific file
+        if "stop.py" in os.listdir(os.getcwd()):
             break
 
     best_loesung_json, bester_wert = mh[0].gebe_endloesung_aus()
