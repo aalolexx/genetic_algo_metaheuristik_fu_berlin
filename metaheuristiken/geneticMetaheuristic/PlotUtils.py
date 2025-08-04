@@ -103,20 +103,20 @@ def plot_routes_timeline(path, routes, max_routes=500):
 
     # Plot each route
     for idx, route in enumerate(routes):
-        start = route.cluster.start_time
+        start = convert_to_time(route.cluster.start_time)
         ax.broken_barh(
-            [(start, route.distance)],
+            [(start, convert_to_time(route.distance))],
             (idx - 0.4, 0.8),
             facecolors=pr_to_color[route.PR]
         )
 
     # Add vertical lines for each unique cluster start time
-    unique_start_times = sorted(set(route.cluster.start_time for route in routes))
+    unique_start_times = sorted(set(convert_to_time(route.cluster.start_time) for route in routes))
     for st in unique_start_times:
         ax.axvline(x=st, color='gray', linestyle='--', linewidth=1)
         ax.text(st, random.randrange(0, len(routes)), f"t={st}", rotation=90, va='bottom', ha='right', fontsize=8, color='gray')
 
-    ax.set_xlabel("Time")
+    ax.set_xlabel("Time (m)")
     ax.set_ylabel("Route index")
     ax.set_title("Rescue Route Timeline (Colored by PR)")
     plt.tight_layout()
@@ -142,13 +142,13 @@ def plot_people_on_street(path, routes, your_max_capacity, step_size=10):
 
     for t, delta in time_events:
         current_people += delta
-        times.append(t)
+        times.append(convert_to_time(t))
         counts.append(current_people)
 
     plt.figure(figsize=(12, 4))
     plt.plot(times, counts, label='People on street')
     plt.axhline(y=your_max_capacity, color='red', linestyle='--', label='Street capacity')
-    plt.xlabel("Time")
+    plt.xlabel("Time (m)")
     plt.ylabel("People on Street")
     plt.title("Street Load Over Time")
     plt.legend()
@@ -263,3 +263,7 @@ def plot_pr_usage_vs_capacity(path, routes, pr_list):
 
     plt.savefig(output_path)
     print(f"Saved plot to {output_path}")
+
+# converto to min (s = 4km/h)
+def convert_to_time(value):
+    return round((value/1000)/4*60)
