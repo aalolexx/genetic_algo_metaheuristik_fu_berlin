@@ -39,12 +39,12 @@ def repair_possible_solution(possible_solution):
             candidates.sort(key=lambda x: x["distance"])
             for candidate in candidates:
                 pr_id = candidate["to"]
-                if pr_usage[pr_id] < pr_capacity[pr_id]:
+                if pr_usage[pr_id] + route.group_size <= pr_capacity[pr_id]:
+                    old_pr = route.PR
                     # Reassign route
                     route.set_pr(pr_id, candidate["distance"])
-                    pr_usage[route.PR] -= route.group_size  # remove from old
-                    route.PR = pr_id
-                    pr_usage[pr_id] += route.group_size
+                    pr_usage[old_pr] -= route.group_size  # remove from old
+                    pr_usage[route.PR] += route.group_size
                     break  # move to next route
 
 
