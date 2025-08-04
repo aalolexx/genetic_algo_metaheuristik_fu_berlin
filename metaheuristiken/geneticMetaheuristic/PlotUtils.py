@@ -245,6 +245,15 @@ def plot_pr_usage_vs_capacity(path, routes, pr_list):
     # sort by (capacity - usage)
     usage, capacities = zip(*sorted(zip(usage, capacities), key=lambda pair: pair[1] - pair[0]))
 
+    # keep plot readable
+    threshold = 25
+    threshold_exceeded = False
+    if len(pr_ids) > threshold:
+        threshold_exceeded = True
+        usage = usage[:threshold]
+        capacities = capacities[:threshold]
+        pr_ids = pr_ids[:threshold]
+
     x = range(len(pr_ids))
 
     # Plotting
@@ -260,7 +269,7 @@ def plot_pr_usage_vs_capacity(path, routes, pr_list):
     plt.xticks(x, pr_ids, rotation=45)
     plt.xlabel('PR ID')
     plt.ylabel('Number of Assigned People')
-    plt.title('PR Usage vs Capacity')
+    plt.title(f'PR Usage vs Capacity sorted by unused capacity{f" (only top {threshold})" if threshold_exceeded else ""}')
     plt.legend()
     plt.tight_layout()
 
