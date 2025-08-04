@@ -242,6 +242,9 @@ def plot_pr_usage_vs_capacity(path, routes, pr_list):
     usage = [pr_usage[pr_id] for pr_id in pr_ids]
     capacities = [pr_capacity[pr_id] for pr_id in pr_ids]
 
+    # sort by (capacity - usage)
+    usage, capacities = zip(*sorted(zip(usage, capacities), key=lambda pair: pair[1] - pair[0]))
+
     x = range(len(pr_ids))
 
     # Plotting
