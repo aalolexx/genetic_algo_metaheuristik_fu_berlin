@@ -29,7 +29,6 @@ class GeneticMetaheuristik(Metaheuristik):
 
         
     def initialisiere(self):
-        start_time = time.time()
 
         # read graph data and set some general variable
         self.ra_list = self.eingabe_daten["residential_areas"]
@@ -70,9 +69,6 @@ class GeneticMetaheuristik(Metaheuristik):
 
         self.generations.append(first_generation)
         self.iteration_counter = 1
-
-        end_time = time.time()
-        print(f"Initialization took {round((end_time - start_time)/60)} minutes.")
 
 
     def iteriere(self):
