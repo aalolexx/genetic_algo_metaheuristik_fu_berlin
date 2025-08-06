@@ -66,9 +66,10 @@ def apply_mutation(possible_solution, all_prs, route_change_rate=0.5, reclusteri
 
     # ---------
     # Mutation 2: Cluster Start Times
+    max_start_time = new_possible_solution.cluster_mapper.max_start_time
     for cluster in new_possible_solution.cluster_mapper.clusters:
         if random.random() < 0.25: # todo check if all these probs should go in conf, i think not
-            new_starting_time = cluster.start_time + random.randrange(-5000, 5000) # todo set step size variable
+            new_starting_time = cluster.start_time + random.randrange(-int(max_start_time/2), int(max_start_time/2)) # todo set step size variable
             cluster.start_time = math.floor(max(0, new_starting_time)) # floor just to have nice starting times
 
     # ---------
