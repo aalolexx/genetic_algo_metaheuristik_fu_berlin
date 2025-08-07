@@ -33,15 +33,15 @@ class PossibleSolution:
         self.routes = routes
 
 
-    def set_loss(self, aplha_time=1):
-        street_cap_loss, pr_overflow_loss, time_loss = self.get_loss_dict()
+    def set_loss(self, alpha_time=1):
+        street_cap_loss, pr_overflow_loss, time_loss = self.get_loss_dict(alpha_time)
 
         # loss function here
-        self.loss = street_cap_loss * 3  + pr_overflow_loss + 0.2 * aplha_time * time_loss
+        self.loss = street_cap_loss + pr_overflow_loss + time_loss
         #print(f"LOSS: {street_overflow_sum / self.max_street_capacity}, {sum_pr_overflows}, {normalized_time} ")
 
     
-    def get_loss_dict(self):
+    def get_loss_dict(self, alpha_time=1):
         amount_street_overflows, street_overflow_sum, normalized_time, steps_took = self.get_street_overflows()
 
         population_size = np.sum([r.group_size for r in self.routes])
@@ -50,10 +50,10 @@ class PossibleSolution:
         sum_pr_overflows = self.get_sum_pr_overflows()
         normalized_pr_overflow = sum_pr_overflows / population_size
 
-        weighted_time = normalized_time
+        weighted_time = alpha_time * normalized_time
         # make sure these two are always maximum penalized
-        weighted_street_overflow = normalized_street_overflow# * 13
-        weighted_pr_overflow = normalized_pr_overflow# * 5
+        weighted_street_overflow = normalized_street_overflow * 40 + (0 if normalized_street_overflow==0 else 1/20 * weighted_time)
+        weighted_pr_overflow = normalized_pr_overflow * 4 + (0 if normalized_pr_overflow==0 else 1/20 * weighted_time)
 
         if weighted_street_overflow == 0 and weighted_pr_overflow == 0:
             self.is_valid = True
