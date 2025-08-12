@@ -9,6 +9,7 @@ class ClusterMapper():
     """
     def __init__(self, ra_list, num_clusters, max_start_time):
         self.ra_list = ra_list
+        self.max_start_time = max_start_time
         self.num_clusters = num_clusters
         self.clusters = self.get_random_cluster_distribution(max_start_time)
 

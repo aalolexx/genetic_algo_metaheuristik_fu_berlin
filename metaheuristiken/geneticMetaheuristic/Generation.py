@@ -2,7 +2,7 @@ class Generation(list):
     def __init__(self, *args):
         super().__init__(*args)
 
-    def set_losses(self):
+    def set_losses(self, alpha_time):
         i = 0
         for ind in self:
             ind.set_loss()

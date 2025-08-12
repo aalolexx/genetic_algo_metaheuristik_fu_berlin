@@ -63,7 +63,7 @@ class GeneticMetaheuristik(Metaheuristik):
             print(f"done with init population {i+1}/{self.konfiguration['population_size']}")
             first_generation.append(possible_solution)
 
-        first_generation.set_losses()
+        first_generation.set_losses(self.konfiguration.get("alpha_time", 1))
 
         first_generation.get_best().write_solution_to_file(self.durchlauf_verzeichnis, 1, self.start_time)
 
@@ -133,7 +133,7 @@ class GeneticMetaheuristik(Metaheuristik):
 
         # Set losses
         print("Calculating Losses")
-        new_generation.set_losses()
+        new_generation.set_losses(self.konfiguration.get("alpha_time", 1))
 
         self.generations.append(new_generation)
         self.iteration_counter += 1
